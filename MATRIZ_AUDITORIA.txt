@@ -1,0 +1,280 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                    MATRIZ DE AUDITORÍA - APPTTIC                             ║
+║              Tracking de Todos los Problemas Encontrados                      ║
+║                                                                               ║
+║ Última actualización: 2 Marzo 2026                                            ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════════════════
+1. FUGAS DE MEMORIA Y COLISIONES
+═══════════════════════════════════════════════════════════════════════════════
+
+ID | Severidad | Archivo(s)           | Problema              | Línea | Estado
+──────────────────────────────────────────────────────────────────────────────
+M1 | 🔴 CRÍTICO| 2_Consultas.js       | Funciones duplicadas  | 1-500 | ⏳ P1
+   |           | Nuevo2_Consultas.js  | (9 funciones)         |       | 
+──────────────────────────────────────────────────────────────────────────────
+M2 | 🔴 CRÍTICO| 3_Utilidades.js      | Duplicadas + DIFF     | 1-130 | ⏳ P1
+   |           | Nuevo3_Utilidades.js | normalizeHeader()     |       |
+──────────────────────────────────────────────────────────────────────────────
+M3 | 🔴 CRÍTICO| 5_Operaciones.js     | onEdit() duplicada    | 180   | ⏳ P1
+   |           | Nuevo5_Operaciones.js| (+15 funciones)       | 120   |
+──────────────────────────────────────────────────────────────────────────────
+M4 | 🔴 CRÍTICO| 1_Interfaz.gs        | doGet, abrirPanel     | 3,10  | ⏳ P1
+   |           | Codigo.gs            | incluir (3x)          | 3,20  |
+──────────────────────────────────────────────────────────────────────────────
+M5 | 🟡 ALTO   | Panel.html           | Duplicado vs          | 1-100 | ⚠️ P2
+   |           | nuevoPanel.html      | nuevoPanel.html       |       |
+
+RESUMEN COLISIONES:
+✗ 4 pares de archivos con duplicación completa
+✗ 1 función crítica (onEdit) duplicada = comportamiento impredecible
+✗ ~1500 líneas de código innecesario
+✗ Riesgo: Sobrescritura silenciosa de funciones
+
+REMEDIACIÓN: 
+- Eliminar archivos antiguos (2_,3_,5_,Codigo.gs)
+- Mantener versiones "Nuevo"
+- Fusión de Codigo en 1_Interfaz
+
+═══════════════════════════════════════════════════════════════════════════════
+2. INTEGRIDAD DE TRAZABILIDAD
+═══════════════════════════════════════════════════════════════════════════════
+
+ID | Severidad | Función                      | Acción     | Línea | Sin Historial?
+──────────────────────────────────────────────────────────────────────────────
+T1 | 🔴 CRÍTICO| procesarSolicitudUnificada  | ACTUALIZAR | 30-40 | ✗✗✗✗
+   |           |                             | ENERGIA    |       | (FALTA)
+──────────────────────────────────────────────────────────────────────────────
+T2 | 🔴 CRÍTICO| procesarSolicitudUnificada  | ACTUALIZAR | 45-55 | ✗✗✗✗
+   |           |                             | RED        |       | (FALTA)
+──────────────────────────────────────────────────────────────────────────────
+T3 | 🔴 CRÍTICO| procesarSolicitudUnificada  | MANTENIM.  | 55-70 | ✗✗✗✗
+   |           |                             | SITIO      |       | (FALTA)
+──────────────────────────────────────────────────────────────────────────────
+T4 | 🔴 CRÍTICO| procesarSolicitudUnificada  | REPORTE    | 70-85 | ✗✗✗✗
+   |           |                             | COM        |       | (FALTA)
+──────────────────────────────────────────────────────────────────────────────
+T5 | 🟡 ALTO   | autorizarSolicitud         | setValue   | 33    | ✗✗ P2
+   |           |                             | AUTORIZADA |       |
+──────────────────────────────────────────────────────────────────────────────
+T6 | 🟡 ALTO   | rechazarSolicitud          | setValue   | 50    | ✗✗ P2
+   |           |                             | RECHAZADA  |       |
+──────────────────────────────────────────────────────────────────────────────
+T7 | 🟢 OK     | registrarEnergiaY...       | appendRow  | 480   | ✓ (OK)
+   |           |                             | + historial|       |
+──────────────────────────────────────────────────────────────────────────────
+T8 | 🟢 OK     | registrarConectividad...   | setValue   | 520   | ✓ (OK)
+   |           |                             | + historial|       |
+──────────────────────────────────────────────────────────────────────────────
+T9 | 🟢 OK     | registrarInstalacion...    | setValue   | 570   | ✓ (OK)
+   |           |                             | + historial|       |
+──────────────────────────────────────────────────────────────────────────────
+T10| 🟢 OK     | procesarEdicionManual      | trigger    | 40    | ✓ (OK)
+   |           |                             | + historial|       |
+
+RESUMEN TRAZABILIDAD:
+✗ 6 operaciones de escritura SIN registrar en Historial
+✗ Incumplimiento de audit trail completo
+✗ Imposible reconstruir "quién cambió qué"
+✗ Riesgo de compliance/normativa
+
+REMEDIACIÓN:
+- Agregar registrarHistorial() en T1-T6
+- Tiempo: 45 minutos
+- Impact: 100% trazabilidad
+
+═══════════════════════════════════════════════════════════════════════════════
+3. MANEJO DE ERRORES
+═══════════════════════════════════════════════════════════════════════════════
+
+ID | Severidad | Archivo Name            | Tipo de Problema    | Línea | Status
+──────────────────────────────────────────────────────────────────────────────
+E1 | 🟡 ALTO   | 3_Utilidades.gs         | catch vacío          | 31    | ⏳ P2
+   |           | registrarHistorial()    | Logger.log only      |       |
+──────────────────────────────────────────────────────────────────────────────
+E2 | 🟡 ALTO   | 3_Utilidades.gs         | catch vacío          | 53    | ⏳ P2
+   |           | registrarAccesoUsuario()| Logger.log only      |       |
+──────────────────────────────────────────────────────────────────────────────
+E3 | 🟡 ALTO   | 2_Consultas.gs          | catch vacío          | 36    | ⏳ P2
+   |           | obtenerTablerosFiltrados| Logger.log only      |       |
+──────────────────────────────────────────────────────────────────────────────
+E4 | 🟡 ALTO   | 2_Consultas.gs          | catch vacío          | 100   | ⏳ P2
+   |           | buscarVinculados...     | Logger.log only      |       |
+──────────────────────────────────────────────────────────────────────────────
+E5 | 🟡 ALTO   | 7_Triggers.gs           | catch vacío          | 43    | ⏳ P2
+   |           | procesarEdicionManual() | return (sin info)    |       |
+──────────────────────────────────────────────────────────────────────────────
+E6 | 🟡 ALTO   | 6_Notificaciones.gs     | catch vacío          | 24    | ⏳ P2
+   |           | enviarMailCambio...     | Logger.log only      |       |
+──────────────────────────────────────────────────────────────────────────────
+E7 | 🟡 ALTO   | 5_Operaciones.gs        | catch vacío          | 150   | ⏳ P2
+   |           | procesarSolicitud...    | Devuelve error cru   |       |
+──────────────────────────────────────────────────────────────────────────────
+E8 | 🟡 ALTO   | 1_Interfaz.gs           | No valida usuario    | 18    | ⏳ P2
+   |           | getUsuarioInfo()        | Devuelve "VISOR"     |       |
+──────────────────────────────────────────────────────────────────────────────
+E9 | 🟡 ALTO   | 5_Operaciones.gs        | No valida payload    | 8     | ⏳ P2
+   |           | procesarSolicitud...    | No requiredFields    |       |
+──────────────────────────────────────────────────────────────────────────────
+
+PATRÓN PROBLEMÁTICO:
+┌────────────────────────────────────┐
+│ } catch(e) { Logger.log(...) }     │ ← Error SOLO en servidor
+│   // Usuario NO se entera          │
+└────────────────────────────────────┘
+
+IMPACTO:
+✗ Operaciones fallan silenciosamente
+✗ Usuarios repiten acciones sin saber qué pasó
+✗ Debugging imposible sin acceso a logs
+✗ UX frustrante
+
+REMEDIACIÓN:
+- Devoluciones estructuradas: { success, message, errorCode }
+- Frontend captura y muestra M.toast()
+- Tiempo: 2 horas
+
+═══════════════════════════════════════════════════════════════════════════════
+4. OPTIMIZACIÓN DE SHEETS API
+═══════════════════════════════════════════════════════════════════════════════
+
+ID | Severidad | Función                 | Problema        | Línea | Ahorro
+──────────────────────────────────────────────────────────────────────────────
+O1 | 🟡 ALTO   | buscadorMaestro()       | Lectura completa| 400   | 80%
+   |           |                         | x6 hojas/búsqda |       | read
+──────────────────────────────────────────────────────────────────────────────
+O2 | 🟡 ALTO   | aplicarFormatoInsumos() | 1000+ llamadas  | 280   | 99%
+   |           |                         | setBackground   |       | API
+──────────────────────────────────────────────────────────────────────────────
+O3 | 🟡 ALTO   | registrarInstala...     | 5+ getHeaderIdx | 650   | 70%
+   |           |                         | innecesarias    |       | search
+──────────────────────────────────────────────────────────────────────────────
+O4 | 🟡 ALTO   | buscarDatosParaReem... | Búsqueda lineal | 540   | 90%
+   |           |                         | O(n) vs O(1)    |       | lookup
+──────────────────────────────────────────────────────────────────────────────
+O5 | 🟢 BIEN   | obtenerMisTareas...    | Cacheado OK     | 180   | ✓ OK
+   |           |                         | En memoria      |       |
+──────────────────────────────────────────────────────────────────────────────
+
+IMPACTO DE PROBLEMAS:
+× Si 1000 filas: 100+ segundos en algunos casos
+× Si 10,000 celdas/búsqueda: API quota agotado rápido
+× UI bloqueado mientras se procesan datos
+
+REMEDIACIÓN:
+- Caché CACHE_SHEETS (O1)
+- Batch setBackgrounds() (O2)
+- Índices cacheados (O3)
+- Map/índice para búsquedas (O4)
+- Tiempo: 3 horas
+- Beneficio: 5-10x más rápido
+
+═══════════════════════════════════════════════════════════════════════════════
+5. SUMMARY TABLE - TODOS LOS PROBLEMAS
+═══════════════════════════════════════════════════════════════════════════════
+
+Categoría          | 🔴 Crítico | 🟡 Alto | 🟢 Bien | Total | Prioridad
+——————————————————————————————————————————————————————————————————————————————
+Colisiones         | 4          | 1       | -       | 5     | 🔴 P1
+Trazabilidad       | 4          | 2       | 4       | 10    | 🔴 P1
+Errores            | -          | 9       | -       | 9     | 🟡 P2
+Performance        | -          | 4       | 1       | 5     | 🟡 P2
+——————————————————————————————————————————————————————————————————————————————
+TOTAL              | 8          | 16      | 5       | 29    |
+
+RIESGO GENERAL:    🔴 MEDIO-ALTO
+TIEMPO REMEDIAR:   15 horas
+ESFUERZO:          BAJO-MEDIO
+
+═══════════════════════════════════════════════════════════════════════════════
+6. MATRIZ DE ARCHIVO A PROBLEMAS
+═══════════════════════════════════════════════════════════════════════════════
+
+Archivo                  | 🔴 Crítico | 🟡 Alto | Status
+————————————————————————————————————————————————————————────
+0_Config.js              | -          | -       | ✅ OK
+1_Interfaz.js            | 1 (dup)    | 1       | ⚠️ ACCIÓN
+2_Consultas.js           | 1 (dup)    | 1       | ❌ ELIMINAR
+Nuevo2_Consultas.js      | -          | -       | ✅ USAR
+3_Utilidades.js          | 1 (dup)    | 2       | ❌ ELIMINAR
+Nuevo3_Utilidades.js     | -          | -       | ✅ USAR
+4_Seguridad.gs           | -          | -       | ✅ OK
+5_Operaciones.js         | 4 (dup+err)| 3       | ❌ ELIMINAR
+Nuevo5_Operaciones.js    | -          | -       | ✅ USAR
+6_Notificaciones.gs      | -          | 1       | ⚠️ ACCIÓN
+7_Triggers.gs            | -          | 1       | ⚠️ ACCIÓN
+8_Informes.gs            | -          | -       | ✅ OK
+9_Tests.gs               | -          | -       | ✅ OK
+10_Gestion_Solicitudes   | -          | 2       | ⚠️ ACCIÓN
+Codigo.gs                | 1 (dup)    | -       | ❌ FUSIONAR
+nuevoPanel.html          | -          | -       | ✅ OK
+Panel.html               | -          | -       | ⚠️ REVISAR
+
+LEYENDA:
+✅ OK: Sin problemas significativos
+⚠️ ACCIÓN: Requiere correcciones menores
+💡 USAR: Versión recomendada (usa esta)
+❌ ELIMINAR: Archivo obsoleto (borra)
+❌ FUSIONAR: Merging requerido
+
+═══════════════════════════════════════════════════════════════════════════════
+7. ACCIONES A TOMAR - ORDENADAS POR PRIORIDAD
+═══════════════════════════════════════════════════════════════════════════════
+
+FASE 1 - HOY (1.5 horas)
+─────────────────────────────────────────────────────────────────────────────
+☐ [🔴P1] Eliminar: 2_Consultas, 3_Utilidades, 5_Operaciones, Codigo
+☐ [🔴P1] Renombrar: Nuevo2→2, Nuevo3→3, Nuevo5→5
+☐ [🔴P1] Agregar registrarHistorial en 6 funciones (T1-T6)
+
+FASE 2 - ESTA SEMANA (5 horas)
+─────────────────────────────────────────────────────────────────────────────
+☐ [🟡P2] Reemplazar 8+ catch vacíos (E1-E8)
+☐ [🟡P2] Implementar validación de payloads
+☐ [🟡P2] Caché CACHE_SHEETS (O1)
+☐ [🟡P2] Batch setBackgrounds (O2)
+☐ [🟡P2] Índices cacheados (O3-O4)
+
+FASE 3 - PRÓXIMA SEMANA (6 horas)
+─────────────────────────────────────────────────────────────────────────────
+☐ [🟢P3] Testing exhaustivo
+☐ [🟢P3] Documentación (README, CHANGELOG)
+☐ [🟢P3] Deploy staging + validación
+☐ [🟢P3] Deploy producción
+
+═══════════════════════════════════════════════════════════════════════════════
+8. REGRESSIONTESTING - VERIFICAR DESPUÉS DE CADA CAMBIO
+═══════════════════════════════════════════════════════════════════════════════
+
+Antes de Commit         | Verificar
+————————————————————————————————————————————————————
+Cambio en 2_Consultas   | testSistema() ✅
+Cambio en 5_Operaciones | testTrazabilidad() ✅
+Cambio en 3_Utilidades  | testPerformance() ✅
+Cambio en Seguridad     | verificarYAutorizar() ✅
+Cualquier merge         | testErrorHandling() ✅
+
+═══════════════════════════════════════════════════════════════════════════════
+9. APPROVAL CHECKLIST - LISTO PARA PRODUCCIÓN
+═══════════════════════════════════════════════════════════════════════════════
+
+CRITERIO                                           | ESTADO
+─────────────────────────────────────────────────────────────────────
+✅ TODOS los tests pasan                            | [ ] SIGN OFF
+✅ Todos los archivos duplicados eliminados         | [ ] SIGN OFF
+✅ Trazabilidad: 100% de escrituras registradas     | [ ] SIGN OFF
+✅ Errores: Todos estructurados y validados         | [ ] SIGN OFF
+✅ Performance: Búsquedas < 500ms                   | [ ] SIGN OFF
+✅ Staging deployment exitoso                       | [ ] SIGN OFF
+✅ Logs revisados (sin errores)                     | [ ] SIGN OFF
+✅ Backup de producción listo                       | [ ] SIGN OFF
+✅ Plan rollback documentado                        | [ ] SIGN OFF
+✅ Documentación actualizada                        | [ ] SIGN OFF
+
+FIRMA QA:                 _____________________    FECHA: __________
+FIRMA TECH LEAD:          _____________________    FECHA: __________
+
+═══════════════════════════════════════════════════════════════════════════════
+                              FIN DE MATRIZ
+═══════════════════════════════════════════════════════════════════════════════
