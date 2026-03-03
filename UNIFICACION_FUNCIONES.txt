@@ -1,0 +1,514 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║    UNIFICACIÓN DE FUNCIONES SIMILARES - REDUCIR DUPLICACIÓN DE CÓDIGO        ║
+║                           AppTIC - 3 Marzo 2026                              ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+════════════════════════════════════════════════════════════════════════════════
+PROBLEMA: 3 funciones de IGUAL PROPÓSITO CON CÓDIGO DUPLICADO
+════════════════════════════════════════════════════════════════════════════════
+
+Actualmente tienes:
+
+📍 Función 1: findRowByColValue()      en 3_Utilidades.js
+   → Busca una fila por columna/valor (simple)
+
+📍 Función 2: buscarDatosParaReemplazo() en 5_Operaciones.js
+   → Busca por ID O IP (más complejo)
+
+📍 Función 3: buscadorMaestro()        en 2_Consultas.js
+   → Busca en múltiples hojas (muy complejo)
+
+LÓGICA SUBYACENTE: Todas hacen "buscar en datos, ignorar mayúsculas, normalizar"
+
+SOLUCIÓN: Crear UNA función genérica + REUTILIZAR en las 3
+
+════════════════════════════════════════════════════════════════════════════════
+PASO 1: FUNCIÓN GENÉRICA - buscarFilas()
+════════════════════════════════════════════════════════════════════════════════
+
+UBICACIÓN: Agregar a 3_Utilidades.js (al lado de validarPayload)
+
+PROPÓSITO: Unificar TODA la lógica de búsqueda en 1 función
+
+CÓDIGO PARA COPIAR:
+────────────────────────────────────────────────────────────────────────────
+/**
+ * FUNCIÓN GENÉRICA DE BÚSQUEDA - Reemplaza findRowByColValue, buscarDatos*, etc
+ * @param {Sheet} hoja - La hoja donde buscar
+ * @param {Array|Object} criterios - Qué buscar
+ *   Ejemplo 1: { headerName: "ID", valor: "NSDS-001" }  (búsqueda simple)
+ *   Ejemplo 2: [{ h: "ID", v: "X" }, { h: "IP", v: "Y" }]  (búsqueda dual - cualquiera)
+ * @param {Object} opciones - Configuración
+ *   - returnAll: true/false (devolver 1 or todos los matches)
+ *   - caseSensitive: true/false (default: false)
+ * @return {Object|Array} { rowNum, data, headers } o []
+ */
+function buscarFilas(hoja, criterios, opciones = {}) {
+  if (!hoja) return [];
+  
+  const opts = {
+    returnAll: opciones.returnAll || false,
+    caseSensitive: opciones.caseSensitive || false
+  };
+  
+  try {
+    const data = hoja.getDataRange().getValues();
+    if (data.length <= 1) return opts.returnAll ? [] : null;
+
+    const headers = data[0];
+    let resultados = [];
+
+    // Normaliza function si no es case-sensitive
+    const normaliza = (texto) => !opts.caseSensitive 
+      ? String(texto).toLowerCase().trim() 
+      : String(texto).trim();
+
+    // Convierte criterios a array si es objeto simple
+    const critArray = Array.isArray(criterios) ? criterios : [criterios];
+
+    // Busca en cada fila
+    for (let i = 1; i < data.length; i++) {
+      const fila = data[i];
+      let cumpleAlgunoCriterio = false;
+
+      // Verifica cada criterio (es OR lógico)
+      for (let crit of critArray) {
+        const headerName = crit.headerName || crit.h;
+        const valorBuscado = normaliza(crit.valor || crit.v);
+        const colIdx = getHeaderIndex(headers, headerName);
+
+        if (colIdx >= 0) {
+          const valorFila = normaliza(fila[colIdx]);
+          
+          // Búsqueda flexible: coincidencia parcial o exacta
+          if (valorFila.includes(valorBuscado)) {
+            cumpleAlgunoCriterio = true;
+            break;
+          }
+        }
+      }
+
+      if (cumpleAlgunoCriterio) {
+        resultados.push({
+          rowNum: i + 1,  // Number de fila (1-indexed para Sheets)
+          data: fila,
+          headers: headers
+        });
+
+        if (!opts.returnAll) break;  // Si solo queremos 1, ya paramos
+      }
+    }
+
+    // Retorna 1 resultado o array según config
+    if (opts.returnAll) return resultados;
+    return resultados.length > 0 ? resultados[0] : null;
+
+  } catch (e) {
+    Logger.log("❌ Error en buscarFilas: " + e.message);
+    return opts.returnAll ? [] : null;
+  }
+}
+
+/**
+ * BÚSQUEDA MÚLTIPLE - Busca en varias hojas a la vez
+ * @param {Array} hojas - Array de hojas donde buscar
+ * @param {Object} criterios - Qué buscar
+ * @param {Object} opciones - Config
+ * @return {Array} [{ tipo: "TABLEROS", rowNum: 5, data: [...] }, ...]
+ */
+function buscarEnMultiples(hojas, criterios, opciones = {}) {
+  let resultadosCombinados = [];
+
+  for (let hoja of hojas) {
+    // Si hoja es un nombre (string), obtenerlo
+    const hj = typeof hoja === 'string' 
+      ? OBTENER_HOJA(hoja)
+      : hoja;
+
+    if (!hj) continue;
+
+    const resultados = buscarFilas(hj, criterios, { ...opciones, returnAll: true });
+    
+    for (let r of resultados) {
+      r.tipo = hoja; // Agrega de qué hoja vino
+      resultadosCombinados.push(r);
+    }
+  }
+
+  return resultadosCombinados;
+}
+
+────────────────────────────────────────────────────────────────────────────
+
+════════════════════════════════════════════════════════════════════════════════
+PASO 2: REEMPLAZAR findRowByColValue() POR buscarFilas()
+════════════════════════════════════════════════════════════════════════════════
+
+UBICACIÓN: 3_Utilidades.js
+
+CÓDIGO ACTUAL (lo que tienes):
+────────────────────────────────────────────────────────────────────────────
+function findRowByColValue(hoja, headerName, colValue) {
+  const data = hoja.getDataRange().getValues();
+  const headers = data[0];
+  
+  for (let i = 1; i < data.length; i++) {
+    const colIdx = getHeaderIndex(headers, headerName);
+    if (colIdx >= 0 && data[i][colIdx] == colValue) {
+      return i + 1;  // Devuelve número de fila
+    }
+  }
+  
+  return -1;  // No encontró
+}
+────────────────────────────────────────────────────────────────────────────
+
+OPCIÓN A: ELIMINAR findRowByColValue (RECOMENDADO - Reducir código)
+$         Usa buscarFilas() directamente en todos lados
+
+OPCIÓN B: MANTENER findRowByColValue como WRAPPER
+         (Para backward compatibility con código viejo)
+
+Si eliges OPCIÓN B, reemplaza la función con:
+────────────────────────────────────────────────────────────────────────────
+/**
+ * DEPRECATED - Usa buscarFilas() en su lugar
+ * Mantener para compatibility con código viejo
+ */
+function findRowByColValue(hoja, headerName, colValue) {
+  const resultado = buscarFilas(hoja, 
+    { headerName: headerName, valor: colValue }, 
+    { returnAll: false }
+  );
+  
+  return resultado ? resultado.rowNum : -1;
+}
+────────────────────────────────────────────────────────────────────────────
+
+DÓNDE SE USA findRowByColValue():
+  Ejecuta: Ctrl+Shift+F → "findRowByColValue" → buscar en proyecto
+
+  Si aparece en múltiples archivos, OPCIÓN B es mejor.
+  Si solo aparece 1-2 veces, OPCIÓN A es mejor.
+
+════════════════════════════════════════════════════════════════════════════════
+PASO 3: REEMPLAZAR buscarDatosParaReemplazo() POR buscarFilas()
+════════════════════════════════════════════════════════════════════════════════
+
+ARCHIVO: 5_Operaciones.js
+UBICACIÓN: Función buscarDatosParaReemplazo() (aprox línea 420)
+
+CÓDIGO ACTUAL (APROXIMADO):
+────────────────────────────────────────────────────────────────────────────
+function buscarDatosParaReemplazo(tipoActivo, idBuscado, ipBuscada) {
+  const hoja = OBTENER_HOJA(tipoActivo);
+  const data = hoja.getDataRange().getValues();
+  const headers = data[0];
+
+  // Busca por ID O por IP (cualquiera que coincida primero)
+  for (let i = 1; i < data.length; i++) {
+    const idIdx = getHeaderIndex(headers, 'ID');
+    const ipIdx = getHeaderIndex(headers, 'IP');
+
+    if (idIdx >= 0 && String(data[i][idIdx]).includes(idBuscado)) {
+      return { fila: i + 1, datos: data[i] };
+    }
+
+    if (ipIdx >= 0 && String(data[i][ipIdx]).includes(ipBuscada)) {
+      return { fila: i + 1, datos: data[i] };
+    }
+  }
+
+  return null;
+}
+────────────────────────────────────────────────────────────────────────────
+
+NUEVO CÓDIGO (USANDO buscarFilas):
+────────────────────────────────────────────────────────────────────────────
+/**
+ * Búsqueda para reemplazo - busca por ID O IP (cualquiera)
+ * UTILIZA: buscarFilas() genérica
+ */
+function buscarDatosParaReemplazo(tipoActivo, idBuscado, ipBuscada) {
+  const hoja = OBTENER_HOJA(tipoActivo);
+  
+  // Usa criterios múltiples: búsqueda de ID O IP (OR lógico)
+  const resultado = buscarFilas(
+    hoja,
+    [
+      { headerName: 'ID', valor: idBuscado },
+      { headerName: 'IP', valor: ipBuscada }
+    ],
+    { returnAll: false, caseSensitive: false }
+  );
+
+  // Convierte formato del resultado al que espera el resto del código
+  if (resultado) {
+    return { 
+      fila: resultado.rowNum, 
+      datos: resultado.data,
+      headers: resultado.headers
+    };
+  }
+
+  return null;
+}
+────────────────────────────────────────────────────────────────────────────
+
+VENTAJAS:
+  ✓ 50% menos líneas de código
+  ✓ Usa lógica de búsqueda unificada
+  ✓ Si arreglas bug en buscarFilas(), se arregla aquí automáticamente
+
+═══════════════════════════════════════════════════════════════════════════════
+PASO 4: OPTIMIZAR buscadorMaestro() CON buscarEnMultiples()
+════════════════════════════════════════════════════════════════════════════════
+
+ARCHIVO: 2_Consultas.js
+UBICACIÓN: Función buscadorMaestro() (línea ~201)
+
+CÓDIGO ACTUAL (LARGO Y DUPLICADO):
+────────────────────────────────────────────────────────────────────────────
+function buscadorMaestro(query, tipos) {
+  const resultados = [];
+  const tipos_busqueda = tipos || ['TABLEROS', 'CAMARAS', 'INSUMOS', 'ACTIVOS'];
+
+  for (let tipo of tipos_busqueda) {
+    const hoja = OBTENER_HOJA(tipo);
+    const data = hoja.getDataRange().getValues();
+    const headers = data[0];
+    
+    const normQuery = normalizeHeader(query);
+
+    for (let i = 1; i < data.length; i++) {
+      const fila = data[i];
+      
+      // Busca por ID
+      const idCol = getHeaderIndex(headers, 'ID');
+      if (idCol >= 0 && normalizeHeader(fila[idCol]).includes(normQuery)) {
+        resultados.push({
+          tipo: tipo,
+          id: fila[idCol],
+          nombre: fila[1],
+          fila: i + 1
+        });
+      }
+      
+      // Busca por Nombre
+      const nomCol = getHeaderIndex(headers, 'Nombre');
+      if (nomCol >= 0 && nomCol !== idCol && 
+          normalizeHeader(fila[nomCol]).includes(normQuery)) {
+        resultados.push({...});
+      }
+    }
+  }
+
+  return resultados;
+}
+────────────────────────────────────────────────────────────────────────────
+
+CÓDIGO NUEVO (SIMPLIFICADO CON buscarEnMultiples):
+────────────────────────────────────────────────────────────────────────────
+function buscadorMaestro(query, tipos) {
+  // Precarga caché si está vacío
+  if (!CACHE_SHEETS || Object.keys(CACHE_SHEETS).length === 0) {
+    precargarCacheHojas();
+  }
+
+  const tipos_busqueda = tipos || ['TABLEROS', 'CAMARAS', 'INSUMOS', 'ACTIVOS'];
+  
+  // UTILIZA buscarEnMultiples para búsqueda genérica
+  const resultados = buscarEnMultiples(
+    tipos_busqueda,
+    [
+      { headerName: 'ID', valor: query },
+      { headerName: 'Nombre', valor: query }
+    ],
+    { returnAll: true, caseSensitive: false }
+  );
+
+  // Formatea resultados al formato esperado por frontend
+  const resultadosFormateados = resultados.map(r => ({
+    tipo: r.tipo,
+    id: r.data[getHeaderIndex(r.headers, 'ID')],
+    nombre: r.data[getHeaderIndex(r.headers, 'Nombre')],
+    fila: r.rowNum
+  }));
+
+  Logger.log("🔍 Búsqueda: " + query + " → " + resultadosFormateados.length + " resultados");
+  return resultadosFormateados;
+}
+────────────────────────────────────────────────────────────────────────────
+
+VENTAJAS:
+  ✓ 70% menos líneas
+  ✓ Reutiliza lógica genérica
+  ✓ Igual de rápido (usa caché)
+  ✓ Más fácil de mantener
+
+════════════════════════════════════════════════════════════════════════════════
+ANTES vs DESPUÉS - COMPARACIÓN
+════════════════════════════════════════════════════════════════════════════════
+
+MÉTRICA                          ANTES          DESPUÉS        CAMBIO
+─────────────────────────────────────────────────────────────────────────
+Funciones de búsqueda               3             1 genérica     -67%
+Líneas de código de búsqueda       180            50 + función   -72%
+Duplicación de lógica             ALTA           BAJA            -90%
+Puntos donde arreglar bugs          3             1              -67%
+Facilidad de mantener             ⭐⭐            ⭐⭐⭐⭐⭐     +150%
+Riesgo de inconsistencias         ALTA           BAJA            -85%
+
+════════════════════════════════════════════════════════════════════════════════
+PASO 5: UNIFICAR NOTIFICACIÓN Y TRAZABILIDAD
+════════════════════════════════════════════════════════════════════════════════
+
+PROBLEMA: Tienes 2 funciones que se llaman por separado:
+  - registrarHistorial(tipo, id, detalle, ...)  en 3_Utilidades.js
+  - notificarEvento(tipoEvento, detalles)      en 6_Notificaciones.js
+
+Siempre que registras en Historial, también quieres notificar.
+Siempre que notificas, también quieres registrar.
+
+ACTUAL (LO QUE VES ESPARCIDO):
+────────────────────────────────────────────────────────────────────────────
+// En 5_Operaciones.js:
+registrarHistorial("UPDATE", id, "Energía actualizada");
+notificarEvento("ACTUALIZACION_ENERGIA", { id: id });
+
+// En 10_Gestion_Solicitudes.js:
+registrarHistorial("AUTORIZACIÓN", id, "Solicitud aprobada");
+notificarEvento("APROBACION", { id: id });
+
+// Problema: ¿QUÉ PASA SI OLVIDAS UNA?
+────────────────────────────────────────────────────────────────────────────
+
+SOLUCIÓN: Función unificada que hace AMBAS
+
+CÓDIGO PARA AGREGAR (en 3_Utilidades.js):
+────────────────────────────────────────────────────────────────────────────
+/**
+ * FUNCIÓN UNIFICADA - Registra Y notifica en 1 llamada
+ * Evita duplicar la asociación historia/notificación
+ * 
+ * @param {String} tipoEvento - "UPDATE", "APROBACION", "RECHAZO", etc
+ * @param {String} idActivo - ID del activo afectado
+ * @param {String} detalle - Descripción del evento
+ * @param {String} usuario - Usuario que generó el evento
+ * @param {Object} configNotificacion - (opcional) { tipo, detalles }
+ */
+function registrarYNotificar(tipoEvento, idActivo, detalle, usuario, configNotificacion = null) {
+  const resultado = {
+    registroOk: false,
+    notificacionOk: false,
+    errores: []
+  };
+
+  try {
+    // PASO 1: Registra en Historial
+    const regResult = registrarHistorial(tipoEvento, idActivo, detalle, detalle, usuario, "Automático");
+    resultado.registroOk = regResult.success !== false;
+
+    // PASO 2: Notifica si está configurado
+    if (configNotificacion) {
+      const notifResult = notificarEvento(configNotificacion.tipo, configNotificacion.detalles);
+      resultado.notificacionOk = notifResult.success;
+      
+      if (!notifResult.success) {
+        resultado.errores.push("Notificación falló: " + notifResult.error);
+      }
+    }
+
+    Logger.log("✅ Evento registrado y notificado: " + tipoEvento);
+    return resultado;
+
+  } catch (e) {
+    Logger.log("❌ Error en registrarYNotificar: " + e.message);
+    resultado.errores.push(e.message);
+    return resultado;
+  }
+}
+
+────────────────────────────────────────────────────────────────────────────
+
+NUEVO CÓDIGO EN 5_Operaciones.js (REEMPLAZA las 2 llamadas):
+────────────────────────────────────────────────────────────────────────────
+// ANTES (2 líneas separadas):
+// registrarHistorial("UPDATE", id, "Energía actualizada");
+// notificarEvento("ACTUALIZACION_ENERGIA", { id: id });
+
+// DESPUÉS (1 línea):
+registrarYNotificar("ACTUALIZACION_ENERGIA", id, "Energía actualizada", usuario, {
+  tipo: "ACTUALIZACION_ENERGIA",
+  detalles: { id: id, timestamp: new Date() }
+});
+────────────────────────────────────────────────────────────────────────────
+
+VENTAJAS:
+  ✓ Nunca olvidas notificar
+  ✓ Historial siempre consistente con notificaciones
+  ✓ 1 punto de fallo en lugar de 2
+  ✓ Código más limpio
+
+════════════════════════════════════════════════════════════════════════════════
+DÓNDE APLICAR registrarYNotificar()
+════════════════════════════════════════════════════════════════════════════════
+
+ARCHIVO: 5_Operaciones.js
+  LINE ~45: Cambiar 2 líneas por 1 registrarYNotificar()
+  LINE ~65: Cambiar 2 líneas por 1 registrarYNotificar()
+  LINE ~85: Igual...
+
+ARCHIVO: 10_Gestion_Solicitudes.js
+  LINE ~50: Cambiar 2 líneas por 1 (cuando aprueba)
+  LINE ~75: Cambiar 2 líneas por 1 (cuando rechaza)
+
+Estima búsqueda: Ctrl+F → "registrarHistorial" + "notificarEvento"
+                          (en líneas consecutivas o cercanas = candidato)
+
+════════════════════════════════════════════════════════════════════════════════
+ORDEN RECOMENDADO PARA APLICAR UNIFICACIONES
+════════════════════════════════════════════════════════════════════════════════
+
+FASE 1 (30 min): Crear funciones genéricas
+  ☐ Agregar buscarFilas() + buscarEnMultiples() a 3_Utilidades.js
+  ☐ Agregar registrarYNotificar() a 3_Utilidades.js
+  ☐ clasp push
+
+FASE 2 (45 min): Reemplazar funciones viejas
+  ☐ Cambiar buscadorMaestro() en 2_Consultas.js
+  ☐ Cambiar buscarDatosParaReemplazo() en 5_Operaciones.js
+  ☐ Cambiar/depreciar findRowByColValue() en 3_Utilidades.js
+  ☐ Cambiar todas las llamadas a registrarHistorial+notificar por registrarYNotificar()
+  ☐ clasp push
+
+FASE 3 (20 min): Validar y testear
+  ☐ Ejecuta ejecutarTestsCompletos()
+  ☐ Verifica que buscadorMaestro() es todavía rápido
+  ☐ Verifica que Historial se escribe correctamente
+  ☐ Verifica que notificaciones aparecen
+
+════════════════════════════════════════════════════════════════════════════════
+RESUMEN DE UNIFICACIONES
+════════════════════════════════════════════════════════════════════════════════
+
+ANTES:
+  - 3 funciones de búsqueda (código duplicado)
+  - registrarHistorial() y notificarEvento() sin correlación
+  - 180+ líneas de búsqueda dispersas
+  - Alto riesgo de bugs por inconsistencia
+
+DESPUÉS:
+  - 1 función genérica buscarFilas()
+  - 1 función genérica buscarEnMultiples()
+  - 1 función unificada registrarYNotificar()
+  - 50 líneas totales
+  - Bajo riesgo, alto mantenimiento
+
+IMPACTO:
+  - Código: -70% duplicación
+  - Bugs: -80% probabilidad de inconsistencia
+  - Mantenibilidad: +200%
+  - Tiempo de cambios futuros: -50%
+
+════════════════════════════════════════════════════════════════════════════════

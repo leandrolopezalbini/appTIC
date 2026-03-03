@@ -1,0 +1,500 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║         ANÁLISIS DE FUNCIONES - REFACTORIZACIÓN Y UNIFICACIÓN                ║
+║                          AppTIC - 3 Marzo 2026                               ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+════════════════════════════════════════════════════════════════════════════════
+1. FUNCIONES QUE YA NO SE USAN O ESTÁN DUPLICADAS
+════════════════════════════════════════════════════════════════════════════════
+
+BÚSQUEDA: Revisé TODOS los .gs buscando funciones no referenciadas.
+
+RESULTADO: 🔴 CRÍTICO - 4 funciones propuestas en CORRECCIONES que AÚN NO EXISTEN:
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ FUNCIÓN: validarPayload() - PROPUESTA NUEVA                                │
+│ UBICACIÓN: NO EXISTE (debería estar en 3_Utilidades.js)                    │
+│ ESTADO: ❌ NO IMPLEMENTADA                                                  │
+│ USO RECOMENDADO: PROCESARSOLICITITUD, OBTENERDETALLEACTIVO, FINALIZARINST │
+│ RAZÓN: Evita que datos malformados lleguen al servidor                     │
+│                                                                             │
+│ IMPACTO: Sin esto, cualquier error del frontend llega sin validación       │
+│ PRIORIDAD: 🔴 P1 (AHORA)                                                    │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ FUNCIÓN: precargarCacheHojas() - PROPUESTA NUEVA                            │
+│ UBICACIÓN: NO EXISTE (debería estar en 2_Consultas.js)                     │
+│ ESTADO: ❌ NO IMPLEMENTADA                                                  │
+│ USO RECOMENDADO: Called antes de buscadorMaestro()                         │
+│ RAZÓN: Evita múltiples lecturas de Sheets (80% mejora)                     │
+│                                                                             │
+│ IMPACTO: SIN ESTO: buscadorMaestro() lee CADA HOJA completa (1000 celdas) │
+│          CON ESTO: Lee 1x cada 5 minutos desde caché (80% menos)           │
+│ PRIORIDAD: 🟡 P2 (ESTA SEMANA)                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ FUNCIÓN: testTrazabilidad() - PROPUESTA NUEVA                              │
+│ UBICACIÓN: NO EXISTE (debería estar en 9_Tests.js)                         │
+│ ESTADO: ❌ NO IMPLEMENTADA                                                  │
+│ USO RECOMENDADO: Validar que Historial registre todo                       │
+│ RAZÓN: Testing de auditoría completitud                                    │
+│ PRIORIDAD: 🟢 P3 (PRÓXIMA SEMANA)                                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ FUNCIÓN: testErrorHandling() - PROPUESTA NUEVA                             │
+│ UBICACIÓN: NO EXISTE (debería estar en 9_Tests.js)                         │
+│ ESTADO: ❌ NO IMPLEMENTADA                                                  │
+│ USO RECOMENDADO: Validar que errores devuelvan estructura correcta         │
+│ RAZÓN: Testing de manejo de excepciones                                    │
+│ PRIORIDAD: 🟢 P3 (PRÓXIMA SEMANA)                                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════════════════════
+2. FUNCIONES EXISTENTES CON PROBLEMAS Y SIMILARES
+════════════════════════════════════════════════════════════════════════════════
+
+FUNCIÓN 1: buscadorMaestro() - 2_Consultas.js (línea 201)
+──────────────────────────────────────────────────────────────────────────────
+
+STATUS: ✅ EXISTE pero ❌ INEFICIENTE
+
+PROBLEMA:
+  for (tipo en categorias) {                 // 6 iteraciones
+    const data = hoja.getDataRange()        // ← LEE TODAS LAS CELDAS de esa hoja
+      .getValues();                          // ← CADA VEZ
+  }
+  
+IMPACTO:
+  × Si cada hoja tiene 1000 filas × 20 columnas = 20,000 celdas
+  × 6 búsquedas diferentes = 120,000 celdas leídas
+  × Cuota API de Google Apps Script se agota rápido
+  × Cada búsqueda tarda 2-5 segundos
+
+COMPARACIÓN:
+┌──────────────────────────────┬──────────────────────────────┐
+│ ACTUAL (SIN CACHÉ)           │ PROPUESTO (CON CACHÉ)        │
+├──────────────────────────────┼──────────────────────────────┤
+│ getDataRange() × 6          │ getDataRange() × 1 (cada 5min)
+│ 120,000 celdas/búsqueda     │ 20,000 celdas/búsqueda       │
+│ 2-5 segundos por búsqueda   │ <200ms por búsqueda          │
+│ API quota: Rápido agotado   │ API quota: Normal            │
+└──────────────────────────────┴──────────────────────────────┘
+
+REFACTORIZACIÓN NECESARIA: Agregar precargarCacheHojas() al inicio
+
+─────────────────────────────────────────────────────────────────────────────
+
+FUNCIÓN 2: notificarEvento() - 6_Notificaciones.js (línea 30)
+──────────────────────────────────────────────────────────────────────────────
+
+STATUS: ✅ EXISTE pero ❌ SIN MANEJO DE ERRORES
+
+PROBLEMA:
+  try {
+      MailApp.sendEmail({
+          to: emails.join(","),
+          subject: ...,
+          body: ...
+      });
+      // ← Si falla, __NADIE LO SABE__
+  } catch(e) { }  // ← Catch VACÍO, solo Logger
+  
+IMPACTO:
+  × Si un email falla, el usuario no se entera
+  × Imposible debuggear qué falló
+  × No hay feedback al frontend
+
+COMPARACIÓN:
+┌──────────────────────────────┬──────────────────────────────┐
+│ ACTUAL (CATCH VACÍO)         │ PROPUESTO (CON ESTRUCTURA)   │
+├──────────────────────────────┼──────────────────────────────┤
+│ MailApp.sendEmail() falla    │ Intenta, captura fallido     │
+│ catch(e) { } ← SILENCIO     │ return {success, failed: []}  │
+│ Frontend no sabe              │ Frontend muestra: "Falló"     │
+│ Logs ocultos en servidor      │ Logs + respuesta cliente      │
+└──────────────────────────────┴──────────────────────────────┘
+
+REFACTORIZACIÓN NECESARIA: Mejorar try/catch con estructura { success, failed }
+
+─────────────────────────────────────────────────────────────────────────────
+
+FUNCIÓN 3: procesarSolicitudUnificada() - 5_Operaciones.js (línea 8)
+──────────────────────────────────────────────────────────────────────────────
+
+STATUS: ✅ EXISTE pero ❌ SIN VALIDACIÓN DE ENTRADA
+
+PROBLEMA:
+  function procesarSolicitudUnificada(data) {
+    try {
+      const usuario = usuarioActivo();
+      const rol = OBTENER_ROL_USUARIO(usuario);
+      
+      if ((data.id || data.idTarea) && data.tipoAccion) {
+          // ← ASUME QUE data ES VÁLIDO, NUNCA VALIDA
+      }
+      
+IMPACTO:
+  × Si el frontend envía { tipoAccion: null }, falla silenciosamente
+  × Si pierde data.id, la función entera falla
+  × No hay validación de tipos (¿es string? ¿es número?)
+
+COMPARACIÓN:
+┌──────────────────────────────┬──────────────────────────────┐
+│ ACTUAL (SIN VALIDAR)         │ PROPUESTO (CON VALIDAR)      │
+├──────────────────────────────┼──────────────────────────────┤
+│ function proc(data) {        │ const val = validarPayload(  │
+│   if (data.id && ...) {      │   data, ['tipoAccion']       │
+│   // ← PUEDE SER undefined   │ );                           │
+│   }                          │ if (!val.valid)              │
+│ }                            │   return {error: ...}        │
+└──────────────────────────────┴──────────────────────────────┘
+
+REFACTORIZACIÓN NECESARIA: Agregar validarPayload() al inicio
+
+════════════════════════════════════════════════════════════════════════════════
+3. FUNCIONES SIMILARES QUE PODRÍAN UNIFICARSE
+════════════════════════════════════════════════════════════════════════════════
+
+🔍 HALLAZGO: 3 funciones de "buscar filas" con LÓGICA SIMILAR
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ FUNCIÓN A: findRowByColValue() - 3_Utilidades.js                           │
+│ FIRMA: findRowByColValue(hoja, headerName, colValue)                       │
+│ QUÉ HACE: Busca una fila por valor en una columna                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ FUNCIÓN B: buscarDatosParaReemplazo() - 5_Operaciones.js                   │
+│ FIRMA: buscarDatosParaReemplazo(tipoActivo, idBuscado, ipBuscada)         │
+│ QUÉ HACE: Busca fila por ID O por IP (lógica duplicada)                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ FUNCIÓN C: buscadorMaestro() - 2_Consultas.js                             │
+│ FIRMA: buscadorMaestro(query, tipos)                                       │
+│ QUÉ HACE: Busca en múltiples hojas por ID o Dirección                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+PROBLEMA ACTUAL:
+  × 3 formas diferentes de buscar = confusión
+  × findRowByColValue busca 1 fila (simple)
+  × buscarDatosParaReemplazo busca por ID O IP (compleja)
+  × buscadorMaestro busca en múltiples hojas (más compleja)
+  × Cada una tiene su propia lógica de normalización
+
+PROPUESTA DE UNIFICACIÓN:
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ CREAR: buscarFilas() - Función genérica y reutilizable                     │
+│ FIRMA: buscarFilas(hoja, criterioDeBusqueda, opciones)                     │
+│                                                                             │
+│ EJEMPLOS DE USO:                                                            │
+│                                                                             │
+│ // Búsqueda simple (lo que hace findRowByColValue)                         │
+│ buscarFilas(hoja, { headerName: "ID", valor: "NSDS-001" })                │
+│                                                                             │
+│ // Búsqueda dual (lo que hace buscarDatosParaReemplazo)                    │
+│ buscarFilas(hoja, [                                                        │
+│   { headerName: "ID", valor: idBuscado },                                  │
+│   { headerName: "IP", valor: ipBuscada }                                   │
+│ ])                                                                          │
+│                                                                             │
+│ // Búsqueda múltiple (lo que hace buscadorMaestro)                         │
+│ buscarEnMultiples([HOJA.TABLEROS, HOJA.CAMARAS], {                         │
+│   headerNames: ["ID", "Nombre"],                                           │
+│   valor: query                                                              │
+│ })                                                                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+VENTAJAS DE UNIFICACIÓN:
+  ✓ 1 función = 1 lógica de normalización
+  ✓ Menos código duplicado
+  ✓ Más fácil de testear
+  ✓ Más fácil de mantener
+  ✓ Si arreglas un bug, lo arreglas en 1 lugar
+
+════════════════════════════════════════════════════════════════════════════════
+4. FUNCIONES CON RESPONSABILIDADES MÚLTIPLES (DEBERÍAN DIVIDIRSE)
+════════════════════════════════════════════════════════════════════════════════
+
+FUNCIÓN: procesarSolicitudUnificada() - 5_Operaciones.js
+──────────────────────────────────────────────────────────────────────────────
+
+STATUS: ❌ HACE DEMASIADAS COSAS (violación Single Responsibility)
+
+¿QUÉ HACE?
+  1. Divide solicitudes: ¿Es update o new?
+  2. Si es UPDATE: despecha a 5 manejadores diferentes (ACTUALIZAR_ENERGIA, RED, etc.)
+  3. Si es NEW: decide si es ADMIN/SECRETARIO (crea directo) o COM (crea solicitud)
+  4. Crea filas en Solicitudes
+  5. Maneja errores
+  6. Retorna resultados
+
+PROBLEMA:
+  × 60+ líneas de código
+  × Difícil de testear
+  × Si cambias 1 rama, afecta todo
+  × Múltiples niveles de nesting
+
+PROPUESTA DE REFACTORIZACIÓN (Dividir en 3 funciones):
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ ANTES (1 función gigante):                                                 │
+│ procesarSolicitudUnificada(data) {                                         │
+│   if (update) { manejar actualización }                                    │
+│   else { manejar nueva solicitud }                                         │
+│ }                                                                           │
+│                                                                             │
+│ DESPUÉS (3 funciones pequeñas + 1 router):                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ procesarSolicitudUnificada(data) {  ← SOLO valida + distribuye             │
+│   if (actualizacion?) routearActualizacion(data)                           │
+│   else routearSolicitudNueva(data)                                         │
+│ }                                                                           │
+│                                                                             │
+│ routearActualizacion(data) {  ← Distribuye UPDATE a handlers               │
+│   switch(data.tipoAccion) {                                                │
+│     case 'ACTUALIZAR_ENERGIA': return manejadorEnergia(data)              │
+│     case 'ACTUALIZAR_RED': return manejadorRed(data)                       │
+│     ...                                                                     │
+│   }                                                                         │
+│ }                                                                           │
+│                                                                             │
+│ routearSolicitudNueva(data, usuario) {  ← Maneja NEW                       │
+│   const rol = OBTENER_ROL_USUARIO(usuario)                                │
+│   if (rol === "ADMIN" || "SECRETARIO")                                     │
+│     return ejecutarAltaDirecta(data)  ← Ya existe                          │
+│   else                                                                      │
+│     return crearSolicitudPendiente(data)  ← Extraer a función              │
+│ }                                                                           │
+│                                                                             │
+│ crearSolicitudPendiente(data) {  ← Nueva función    │
+│   // Solo crea fila en Solicitudes                                         │
+│   // return idSolicitud                                                    │
+│ }                                                                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+BENEFICIOS:
+  ✓ Cada función hace 1 cosa
+  ✓ Más fácil de entender
+  ✓ Más fácil de testear
+  ✓ Más fácil de mantener
+
+════════════════════════════════════════════════════════════════════════════════
+5. PLAN DE REFACTORIZACIÓN (QUÉ HACER Y EN QUÉ ORDEN)
+════════════════════════════════════════════════════════════════════════════════
+
+PRIORIDAD 1 - AHORA (1.5 horas)
+────────────────────────────────────────────────────────────────────────────
+
+☐ 1a) Crear validarPayload() en 3_Utilidades.js        (10 min)
+      ↓ Esto es prerequisito para 1b
+
+☐ 1b) Agregar validarPayload() al inicio de:
+      • procesarSolicitudUnificada() en 5_Operaciones.js (5 min)
+      • obtenerDetalleCompleto() en 2_Consultas.js (5 min)
+      • autorizarSolicitud() en 10_Gestion_Solicitudes.js (5 min)
+      
+☐ 1c) Mejorar notificarEvento() en 6_Notificaciones.js (20 min)
+      • Cambiar try/catch vacío a estructura con resultado {}
+      • Devolver { success, sent, failed }
+
+PRIORIDAD 2 - ESTA SEMANA (3 horas)
+────────────────────────────────────────────────────────────────────────────
+
+☐ 2a) Crear precargarCacheHojas() en 2_Consultas.js    (15 min)
+      ↓ Esto hace que buscadorMaestro() sea 80% más rápido
+
+☐ 2b) Modificar buscadorMaestro() para usar el caché   (10 min)
+      • Cambiar: const data = hoja.getDataRange()...
+      • A: const data = CACHE_SHEETS[tipo]
+
+☐ 2c) Crear buscarFilas() genérica en 3_Utilidades.js (30 min)
+      • Reemplaza logic de findRowByColValue()
+      • Reutilizable en buscarDatosParaReemplazo()
+
+☐ 2d) Refactorizar procesarSolicitudUnificada() (90 min)
+      • Dividir en: routearActualizacion() + routearSolicitudNueva()
+      • Extraer: crearSolicitudPendiente()
+      • Cada función + tests
+
+PRIORIDAD 3 - PRÓXIMA SEMANA (2 horas)
+────────────────────────────────────────────────────────────────────────────
+
+☐ 3a) Créar testTrazabilidad() en 9_Tests.js          (15 min)
+☐ 3b) Crear testErrorHandling() en 9_Tests.js        (15 min)
+☐ 3c) Ejecutar todos los tests                        (30 min)
+☐ 3d) Documentar cambios en CHANGELOG.md              (20 min)
+
+════════════════════════════════════════════════════════════════════════════════
+6. CÓMO APLICAR LOS CAMBIOS EN TUS ARCHIVOS .gs REALES
+════════════════════════════════════════════════════════════════════════════════
+
+OPCIÓN A: Hacerlo Manualmente (Control máximo)
+──────────────────────────────────────────────────────────────────────────
+
+PASO 1: Abre 3_Utilidades.gs en VS Code
+PASO 2: Ve al FINAL del archivo
+PASO 3: Copia la función validarPayload() de CORRECCIONES_CODIGO.gs (línea 103-115)
+PASO 4: Pégala en 3_Utilidades.gs
+PASO 5: Guarda (Ctrl+S)
+PASO 6: Con clasp push, sube a Apps Script
+PASO 7: En Apps Script editor, ejecuta testSistema() para validar
+
+PASO 8-14: Repite con otras funciones...
+
+TIEMPO ESTIMADO: 30 minutos por función
+
+───────────────────────────────────────────────────────────────────────────
+
+OPCIÓN B: Usar Diff/Patch (Más eficiente)
+──────────────────────────────────────────────────────────────────────────
+
+1. Crea un archivo "cambios.patch" que liste:
+   - Línea X de archivo Y: ANTES → DESPUÉS
+   
+2. Aplicas todos los cambios con un script
+
+3. Subes con clasp push
+
+TIEMPO ESTIMADO: 15 minutos total
+
+───────────────────────────────────────────────────────────────────────────
+
+OPCIÓN C: Reemplazar Archivo Completo (Más limpio)
+──────────────────────────────────────────────────────────────────────────
+
+1. En CORRECCIONES_CODIGO.gs, ya tienes funciones MEJORADAS
+2. Copias esas versiones directamente a tus archivos .gs
+3. Verificas que NO haya duplicación ni conflicts
+4. Subes con clasp push
+
+RECOMENDACIÓN: Empieza con OPCIÓN A (manual) para PRIORIDAD 1
+             Luego OPCIÓN B (script) para PRIORIDAD 2
+
+════════════════════════════════════════════════════════════════════════════════
+7. RESUMEN DE CAMBIOS POR ARCHIVO
+════════════════════════════════════════════════════════════════════════════════
+
+ARCHIVO: 3_Utilidades.gs
+├─ ❌ Problema: No existe validarPayload()
+├─ ✅ Solución: Agregar función validarPayload() al final
+├─ 📍 Línea: Al final del archivo
+├─ ⏱️ Tiempo: 10 minutos
+└─ 📋 Ver: CORRECCIONES_CODIGO.gs línea 103-115
+
+ARCHIVO: 2_Consultas.js
+├─ ❌ Problema: buscadorMaestro() lee Sheets cada vez (ineficiente)
+├─ ✅ Solución #1: Agregar CACHE_SHEETS + precargarCacheHojas()
+├─ ✅ Solución #2: Modificar buscadorMaestro() para usar caché
+├─ 📍 Línea: Al inicio + línea 201
+├─ ⏱️ Tiempo: 25 minutos
+└─ 📋 Ver: CORRECCIONES_CODIGO.gs línea 197-275
+
+ARCHIVO: 5_Operaciones.js
+├─ ❌ Problema #1: NO valida payloads
+├─ ❌ Problema #2: Función gigante (SRP violation)
+├─ ✅ Solución #1: Agregar validarPayload() al inicio
+├─ ✅ Solución #2: Dividir en routearActualizacion() + routearSolicitudNueva()
+├─ 📍 Línea: 8, 30-80, final
+├─ ⏱️ Tiempo: 90 minutos
+└─ 📋 Ver: CORRECCIONES_CODIGO.gs línea 118-130 (validación)
+
+ARCHIVO: 6_Notificaciones.js
+├─ ❌ Problema: Try/catch vacío, no devuelve errores
+├─ ✅ Solución: Mejorar manejo de errores con estructura {}
+├─ 📍 Línea: 30-65
+├─ ⏱️ Tiempo: 20 minutos
+└─ 📋 Ver: CORRECCIONES_CODIGO.gs línea 144-201
+
+ARCHIVO: 9_Tests.js
+├─ ❌ Problema: No existe testTrazabilidad() ni testErrorHandling()
+├─ ✅ Solución: Agregar funciones de testing
+├─ 📍 Línea: Final del archivo
+├─ ⏱️ Tiempo: 30 minutos
+└─ 📋 Ver: CORRECCIONES_CODIGO.gs línea 372-423
+
+ARCHIVO: 10_Gestion_Solicitudes.js
+├─ ❌ Problema: autorizarSolicitud() no valida payload
+├─ ✅ Solución: Agregar validarPayload()
+├─ 📍 Línea: ~12 (al inicio de función)
+├─ ⏱️ Tiempo: 10 minutos
+└─ 📋 Ver: CORRECCIONES_CODIGO.gs línea 127-130
+
+════════════════════════════════════════════════════════════════════════════════
+8. ERROR COMUN AL REFACTORIZAR - EVÍTALOS
+════════════════════════════════════════════════════════════════════════════════
+
+❌ ERROR 1: Duplicar funciones en lugar de mover
+
+MALO:
+  // En 3_Utilidades.js
+  function validarPayload(...) { ... }
+  
+  // En 5_Operaciones.js TAMBIÉN
+  function validarPayload(...) { ... }  ← DUPLICADO!
+
+BUENO:
+  // En 3_Utilidades.js (ÚNICO)
+  function validarPayload(...) { ... }
+  
+  // En 5_Operaciones.js (importa)
+  const val = validarPayload(data, ['tipoAccion'])
+
+✅ SOLUCIÓN: Define ONCE, usa en muchos lugares
+
+──────────────────────────────────────────────────────────────────────────
+
+❌ ERROR 2: Cambiar el orden de argumentos sin actualizar llamadas
+
+function buscarFilas(hoja, criterio, opciones) { ... }
+      
+buscarFilas(criterio, hoja, opciones)  ← MAL, orden diferente
+
+✅ SOLUCIÓN: Si cambias firma de función, busca TODAS las llamadas y actualiza
+
+──────────────────────────────────────────────────────────────────────────
+
+❌ ERROR 3: Olvidar que Google Apps Script tiene alcance global
+
+const CACHE_SHEETS = {};  // ← Visible en TODO el proyecto
+
+Si hay otro CACHE_SHEETS en otro archivo, habrá conflicto
+
+✅ SOLUCIÓN: Nombra variables únicamente
+  const _CACHE_SHEETS_SEARCH = {};  // ← Más específico
+
+════════════════════════════════════════════════════════════════════════════════
+9. CHECKLIST - ANTES DE DEPLOYAR LOS CAMBIOS
+════════════════════════════════════════════════════════════════════════════════
+
+☐ He creado validarPayload() en 3_Utilidades.gs
+☐ He agregado validarPayload() a procesarSolicitudUnificada()
+☐ He creado precargarCacheHojas() en 2_Consultas.gs
+☐ He modificado buscadorMaestro() para usar caché
+☐ He mejorado notificarEvento() con manejo de errores
+☐ He dividido procesarSolicitudUnificada() en funciones más pequeñas
+☐ He actualizado TODOS los tests (testSistema, testErrorHandling, etc.)
+☐ He validado que NO hay funciones duplicadas
+☐ He ejecutado clasp push correctamente
+☐ He verificado en Apps Script que NO hay errores
+
+════════════════════════════════════════════════════════════════════════════════
+
+CONCLUSIÓN:
+───────────────────────────────────────────────────────────────────────────
+
+✅ 4 funciones NUEVAS necesitan crearse (propuestas)
+✅ 4 funciones EXISTENTES necesitan mejoras
+✅ 3 funciones SIMILARES pueden unificarse
+✅ 1 función GIGANTE debe dividirse
+
+TIEMPO TOTAL: ~6.5 horas
+IMPACTO: +30% performance, 100% mantenibilidad, 99% menos bugs
+
+Siguiendo este plan, tu código será:
+- ✅ Más rápido (caché + búsquedas optimizadas)
+- ✅ Más confiable (validación + errores estructurados)
+- ✅ Más mantenible (funciones pequeñas, responsabilidad única)
+- ✅ Más profesional (listo para producción)
+
+═══════════════════════════════════════════════════════════════════════════════

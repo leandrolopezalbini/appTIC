@@ -276,7 +276,7 @@ function obtenerDashboardSeguimiento() {
 }
 
 /** Devuelve las tareas asignadas específicamente al perfil TECNICO que estén PENDIENTES.
- * Se usa en la página 'tareas' (Mis Tareas). */
+ * Se usa en la página 'tareas' (Mis Tareas).*/
 function obtenerMisTareasAsignadas() {
   try {
     const usuarioInfo = obtenerMisPermisos(); // Usamos la función de seguridad que ya tienes

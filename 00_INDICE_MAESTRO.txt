@@ -1,0 +1,402 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║              📚 ÍNDICE MAESTRO - DOCUMENTOS DE REFACTORIZACIÓN               ║
+║                         AppTIC - 3 Marzo 2026                                ║
+║                                                                               ║
+║  7 documentos + 300+ páginas de análisis, código y planes de implementación   ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+════════════════════════════════════════════════════════════════════════════════
+ACCESO RÁPIDO - BUSCAR POR PROBLEMA
+════════════════════════════════════════════════════════════════════════════════
+
+¿Cuál es tu problema?
+
+┌─ "La búsqueda es lenta (5 segundos)"
+│  → REFACTORIZACION_PASO_A_PASO.txt PASO 4 y 5
+│  → DIAGRAMA_VISUAL.txt (cómo funciona caché)
+│  → QUICK_REFERENCE.txt (copiar código de caché)
+│
+├─ "No sé por dónde empezar"
+│  → INDICE_EJECUTIVO.txt (lee PRIMERO)
+│  → DIAGRAMA_VISUAL.txt (entiende el problema visual)
+│  → REFACTORIZACION_PASO_A_PASO.txt (empieza a implementar)
+│
+├─ "Quiero el código exacto para copiar/pegar"
+│  → QUICK_REFERENCE.txt (está TODO ahí)
+│  → REFACTORIZACION_PASO_A_PASO.txt (instrucciones línea por línea)
+│
+├─ "¿Qué voy a cambiar y por qué?"
+│  → ANALISIS_FUNCIONES_DETALLADO.txt (el "por qué")
+│  → DIAGRAMA_VISUAL.txt (visualización antes/después)
+│
+├─ "Algo se rompió después de los cambios"
+│  → PLAN_ROLLBACK.txt (INMEDIATAMENTE, lee esto)
+│  → PLAN_ROLLBACK.txt ESCENARIOS 1-8 (encuentra tu error específico)
+│
+├─ "¿Cómo reducir duplicación de código?"
+│  → UNIFICACION_FUNCIONES.txt (todo sobre refactorización avanzada)
+│  → QUICK_REFERENCE.txt (código de funciones genéricas)
+│
+├─ "Quiero entender la arquitectura COMPLETA"
+│  → DIAGRAMA_VISUAL.txt (antes vs después)
+│  → ANALISIS_FUNCIONES_DETALLADO.txt (cada función, qué hace, por qué)
+│  → REFACTORIZACION_PASO_A_PASO.txt (implementación)
+│
+└─ "¿Cuánto tiempo toma, cuál es el riesgo?"
+   → INDICE_EJECUTIVO.txt sección "PLAN DE IMPLEMENTACIÓN"
+   → DIAGRAMA_VISUAL.txt sección "RISK MATRIX"
+   → PLAN_ROLLBACK.txt (contingencia)
+
+════════════════════════════════════════════════════════════════════════════════
+LISTA COMPLETA DE DOCUMENTOS
+════════════════════════════════════════════════════════════════════════════════
+
+📄 1. INDICE_EJECUTIVO.txt (ESTE DOCUMENTO)
+   ├─ Para: Project Manager, Tech Lead, Developer apurado
+   ├─ Tiempo: 5 minutos
+   ├─ Contiene:
+   │  • Este índice 
+   │  • Guía de navegación por problema
+   │  • Resumen de qué esperar
+   └─ Lee SI: Necesitas orientación general
+
+────────────────────────────────────────────────────────────────────────────
+
+📄 2. ANALISIS_FUNCIONES_DETALLADO.txt
+   ├─ Para: Senior Developer, QA, Architecture review
+   ├─ Tiempo: 15 minutos lectura
+   ├─ Contiene:
+   │  • 4 funciones NUEVAS que necesitas crear
+   │  • 4 funciones EXISTENTES con problemas (cómo arregladas)
+   │  • 3 funciones SIMILARES que pueden unificarse
+   │  • 1 función GIGANTE que debe dividirse
+   │  • Plan de refactorización por prioridad (P1, P2, P3)
+   │  • Checklist de cambios por archivo
+   │  • Error común al refactorizar
+   └─ Lee SI: Necesitas entender el problema a fondo
+
+────────────────────────────────────────────────────────────────────────────
+
+📄 3. REFACTORIZACION_PASO_A_PASO.txt
+   ├─ Para: Developer implementando, QA validando
+   ├─ Tiempo: 30 minutos lectura + 90 minutos implementación
+   ├─ Contiene:
+   │  • PASO 1: Crear validarPayload() (10 min)
+   │  • PASO 2: Agregar validación a procesarSolicitudUnificada() (5 min)
+   │  • PASO 3: Mejorar notificarEvento() (20 min)
+   │  • PASO 4: Crear precargarCacheHojas() (15 min)
+   │  • PASO 5: Modificar buscadorMaestro() (10 min)
+   │  • PASO 6: Agregar validación a autorizarSolicitud() (5 min)
+   │  • PASO 7: Crear tests (30 min)
+   │  • Checklist final de validación
+   │
+   │ CADA PASO tiene:
+   │  - Ubicación exacta (archivo, línea)
+   │  - Código ANTES (lo que tienes)
+   │  - Código DESPUÉS (con código copy/paste)
+   │  - Cómo verificar que funcionó
+   └─ Lee SI: Estás implementando y necesitas instrucciones exactas
+
+────────────────────────────────────────────────────────────────────────────
+
+📄 4. UNIFICACION_FUNCIONES.txt
+   ├─ Para: Senior Developer, refactorización avanzada
+   ├─ Tiempo: 15 minutos lectura + 45 minutos implementación
+   ├─ Contiene:
+   │  • PASO 1: Función genérica buscarFilas()
+   │  • PASO 2: Función genérica buscarEnMultiples()
+   │  • PASO 3: Reemplazar findRowByColValue()
+   │  • PASO 4: Reemplazar buscarDatosParaReemplazo()
+   │  • PASO 5: Optimizar buscadorMaestro()
+   │  • Función unificada registrarYNotificar()
+   │  • Antes vs Después (metrics de reducción)
+   │
+   │ IMPORTANTE: Esto es OPCIONAL pero RECOMENDADO
+   │ (Hacer DESPUÉS de REFACTORIZACION_PASO_A_PASO PASOS 1-7)
+   └─ Lee SI: Quieres optimización profesional después de FASE 1
+
+────────────────────────────────────────────────────────────────────────────
+
+📄 5. QUICK_REFERENCE.txt
+   ├─ Para: Developer en implementación (cheat sheet)
+   ├─ Tiempo: 10 minutos (búsqueda rápida mientras codeas)
+   ├─ Contiene:
+   │  • 4 NUEVAS FUNCIONES - Código completo copy/paste
+   │    - validarPayload()
+   │    - precargarCacheHojas()
+   │    - testTrazabilidad()
+   │    - testErrorHandling()
+   │  • Reemplazos EXACTOS - ANTES/DESPUÉS
+   │  • Cambio GRANDE notificarEvento() (función completa)
+   │  • Flujo visual de cambios (qué cambiar después de qué)
+   │  • Checklist mientras implementas
+   │  • Solución rápida de problemas comunes
+   │  • Comandos copy/paste para terminal
+   └─ Lee SI: Necesitas código listo para copiar/pegar
+
+────────────────────────────────────────────────────────────────────────────
+
+📄 6. DIAGRAMA_VISUAL.txt
+   ├─ Para: Everyone (visual learners)
+   ├─ Tiempo: 10 minutos
+   ├─ Contiene:
+   │  • ESTADO ACTUAL (problemas visuales con ASCII)
+   │  • ESTADO DESEADO (soluciones visuales)
+   │  • Comparación lado a lado (antes vs después)
+   │  • Flujo de datos ANTES (dónde falla)
+   │  • Flujo de datos DESPUÉS (mejorado)
+   │  • Matriz de cambios (qué archivo, qué acción, cuánto tiempo)
+   │  • Impacto esperado en producción (tabla de metrics)
+   │  • Hoja de ruta visual (3 fases)
+   │  • RISK MATRIX (probabilidad vs impacto)
+   └─ Lee SI: Eres visual y quieres entender diagrams
+
+────────────────────────────────────────────────────────────────────────────
+
+📄 7. PLAN_ROLLBACK.txt
+   ├─ Para: Everyone (seguridad en producción)
+   ├─ Tiempo: 10 minutos lectura (espero que no lo uses)
+   ├─ Contiene:
+   │  • ANTES DE EMPEZAR: Preparación crítica (backup)
+   │  • ESCENARIO 1: "Error: validarPayload is not defined"
+   │  • ESCENARIO 2: "TypeError: CACHE_SHEETS is undefined"
+   │  • ESCENARIO 3: "Aplicación lenta"
+   │  • ESCENARIO 4: "Errores silenciosos"
+   │  • ESCENARIO 5: "notificarEvento() no retorna resultado"
+   │  • ESCENARIO 6: "Tests fallan"
+   │  • ESCENARIO 7: "Frontend está roto"
+   │  • ESCENARIO 8: "Accidente: borraste código"
+   │  • Plan de rollback fase por fase
+   │  • Testing antes de producción
+   │  • Monitoreo post-deployment
+   │  • Escalación de problemas (prioridad)
+   │  • Checklist final
+   └─ Lee SI: Algo falla o quieres estar preparado (RECOMENDADO)
+
+════════════════════════════════════════════════════════════════════════════════
+MATRIZ DE LECTURA RECOMENDADA SEGÚN PERFIL
+════════════════════════════════════════════════════════════════════════════════
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║ PERFIL: PROJECT MANAGER / TL                                             ║
+├────────────────────────────────────────────────────────────────────────────┤
+│ Documentos clave:                                                          │
+│  1. INDICE_EJECUTIVO.txt (5 min) - Entender el plan general              │
+│  2. DIAGRAMA_VISUAL.txt (10 min) - Visualizar antes/después              │
+│  3. ANALISIS_FUNCIONES_DETALLADO.txt sección "PLAN" (5 min)             │
+│                                                                            │
+│ Tiempo total: 20 minutos                                                   │
+│ Qué necesitas saber: "¿Cuánto toma? ¿Cuál es el riesgo? ¿Qué mejora?"   │
+╚════════════════════════════════════════════════════════════════════════════╝
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║ PERFIL: SENIOR DEVELOPER (autoriza, revisa código)                        ║
+├────────────────────────────────────────────────────────────────────────────┤
+│ Documentos clave:                                                          │
+│  1. ANALISIS_FUNCIONES_DETALLADO.txt (15 min) - Entender cada problema  │
+│  2. DIAGRAMA_VISUAL.txt (10 min) - Arquitectura completa                │
+│  3. REFACTORIZACION_PASO_A_PASO.txt (30 min) - Review de código        │
+│  4. UNIFICACION_FUNCIONES.txt (15 min) - Optimización avanzada           │
+│  5. PLAN_ROLLBACK.txt (10 min) - Contingencia                            │
+│                                                                            │
+│ Tiempo total: 1.5 horas (lectura y review)                               │
+│ Qué necesitas saber: "¿Está bien hecho? ¿Hay riesgos? ¿Falta algo?"     │
+╚════════════════════════════════════════════════════════════════════════════╝
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║ PERFIL: DEVELOPER IMPLEMENTADOR (hace los cambios)                        ║
+├────────────────────────────────────────────────────────────────────────────┤
+│ Documentos clave:                                                          │
+│  1. REFACTORIZACION_PASO_A_PASO.txt (30 min lectura + 90 min impl)      │
+│  2. QUICK_REFERENCE.txt (siempre abierto, 10 min consultas)             │
+│  3. PLAN_ROLLBACK.txt ESCENARIOS (si algo falla)                        │
+│                                                                            │
+│ Opcionalmente DESPUÉS:                                                     │
+│  4. UNIFICACION_FUNCIONES.txt (si quieres FASE 2)                       │
+│                                                                            │
+│ Tiempo total: 2 horas (implementación + validación)                      │
+│ Qué necesitas saber: "¿Exactamente cómo cambio esto? ¿Cómo verifico?"   │
+╚════════════════════════════════════════════════════════════════════════════╝
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║ PERFIL: QA / TESTER (valida que funcionan)                               ║
+├────────────────────────────────────────────────────────────────────────────┤
+│ Documentos clave:                                                          │
+│  1. ANALISIS_FUNCIONES_DETALLADO.txt "PLAN" (10 min)                   │
+│  2. REFACTORIZACION_PASO_A_PASO.txt PASO 7 (tests) (15 min)            │
+│  3. PLAN_ROLLBACK.txt "Testing antes de producción" (5 min)             │
+│  4. DIAGRAMA_VISUAL.txt "IMPACTO" (5 min)                               │
+│                                                                            │
+│ Tiempo total: 35 minutos                                                  │
+│ Qué necesitas saber: "¿Qué debo probar? ¿Cómo sé que está correcto?"   │
+╚════════════════════════════════════════════════════════════════════════════╝
+
+════════════════════════════════════════════════════════════════════════════════
+CONTENIDO RESUMIDO POR SECCIÓN
+════════════════════════════════════════════════════════════════════════════════
+
+PROBLEMAS TÉCNICOS:
+  - Búsqueda lenta (5 segundos)             → REFACTORIZACION.txt PASO 4-5
+  - Errores silenciosos                      → QUICK_REFERENCE.txt
+  - Código duplicado (3 búsquedas)          → UNIFICACION_FUNCIONES.txt
+  - Sin validación de entrada                → REFACTORIZACION.txt PASO 2
+  - Función gigante (procesarSolicitud)     → ANALISIS_FUNCIONES.txt sec 4
+
+CÓDIGO (copy/paste ready):
+  - validarPayload()                        → QUICK_REFERENCE.txt línea 17
+  - precargarCacheHojas()                   → QUICK_REFERENCE.txt línea 40
+  - notificarEvento() NUEVA                 → QUICK_REFERENCE.txt línea 98
+  - testTrazabilidad()                      → QUICK_REFERENCE.txt línea 148
+  - buscarFilas()                           → UNIFICACION_FUNCIONES.txt PASO 1
+
+CAMBIOS EXACTOS:
+  - procesarSolicitudUnificada() + validación → REFACTORIZACION.txt PASO 2
+  - buscadorMaestro() + caché               → REFACTORIZACION.txt PASO 5
+  - notificarEvento() completo              → QUICK_REFERENCE.txt "CAMBIO GRANDE"
+  - autorizarSolicitud() + validación       → REFACTORIZACION.txt PASO 6
+
+IMPLEMENTACIÓN:
+  - Orden correcto de pasos                 → REFACTORIZACION.txt
+  - Cómo verificar cada paso                → REFACTORIZACION.txt (cada PASO)
+  - Checklist durante implementación        → QUICK_REFERENCE.txt "CHECKLIST"
+
+SEGURIDAD:
+  - Backup antes de empezar                 → PLAN_ROLLBACK.txt PASO 0
+  - Si algo se rompe                        → PLAN_ROLLBACK.txt ESCENARIOS 1-8
+  - Testing antes de producción             → PLAN_ROLLBACK.txt "TESTING"
+  - Rollback rápido                         → PLAN_ROLLBACK.txt "ROLLBACK"
+
+IMPACTO:
+  - Metrics antes/después                   → DIAGRAMA_VISUAL.txt "IMPACTO"
+  - Visualización de cambios                → DIAGRAMA_VISUAL.txt "MATRIZ"
+  - Riesgos vs Beneficios                   → DIAGRAMA_VISUAL.txt "RISK MATRIX"
+
+════════════════════════════════════════════════════════════════════════════════
+TABLA DE CONTENIDOS COMPLETA
+════════════════════════════════════════════════════════════════════════════════
+
+ANALISIS_FUNCIONES_DETALLADO.txt:
+  1. Funciones nuevas (4)
+  2. Funciones con problemas (4)
+  3. Funciones similares (3)
+  4. Función gigante (1)
+  5. Plan de refactorización (P1, P2, P3)
+  6. Cambios por archivo
+  7. Errores comunes
+
+REFACTORIZACION_PASO_A_PASO.txt:
+  PASO 1: validarPayload() (10 min)
+  PASO 2: validación en procesarSolicitud (5 min)
+  PASO 3: notificarEvento() (20 min)
+  PASO 4: precargarCacheHojas() (15 min)
+  PASO 5: buscadorMaestro() + caché (10 min)
+  PASO 6: validación en autorizarSolicitud (5 min)
+  PASO 7: tests (30 min)
+  Checklist final
+
+UNIFICACION_FUNCIONES.txt:
+  PASO 1: buscarFilas() + buscarEnMultiples()
+  PASO 2: reemplazar findRowByColValue()
+  PASO 3: reemplazar buscarDatosParaReemplazo()
+  PASO 4: optimizar buscadorMaestro()
+  PASO 5: registrarYNotificar()
+  Antes vs Después metrics
+
+QUICK_REFERENCE.txt:
+  4 NUEVAS FUNCIONES (completas, copy/paste)
+  Reemplazos exactos (ANTES/DESPUÉS)
+  Cambio GRANDE (notificarEvento)
+  Flujo visual
+  Checklist
+  Solución rápida
+
+DIAGRAMA_VISUAL.txt:
+  Estado ACTUAL (problemas)
+  Estado DESEADO (soluciones)
+  Comparación lado a lado
+  Flujo de datos ANTES
+  Flujo de datos DESPUÉS
+  Matriz de cambios
+  Impacto esperado
+  Hoja de ruta (3 fases)
+  Risk matrix
+
+PLAN_ROLLBACK.txt:
+  Backup (PASO 0)
+  8 ESCENARIOS de fallo
+  Rollback por fase
+  Testing
+  Monitoreo
+  Escalación
+  Checklist final
+
+════════════════════════════════════════════════════════════════════════════════
+BÚSQUEDAS RÁPIDAS - CTRL+F EN CADA DOCUMENTO
+════════════════════════════════════════════════════════════════════════════════
+
+Quiero encontrar...                           Busca en...
+─────────────────────────────────────────────────────────────────────────────
+Código de validarPayload()                    QUICK_REFERENCE.txt "FUNCIÓN 1"
+Cómo usar precargarCacheHojas()               REFACTORIZACION.txt "PASO 4"
+Caché explicado                               DIAGRAMA_VISUAL.txt "FLUJO DATOS"
+Reemplazar notificarEvento()                  QUICK_REFERENCE.txt "CAMBIO GRANDE"
+Qué hace cada función                         ANALISIS_FUNCIONES.txt
+¿Cuánto tiempo?                               DIAGRAMA_VISUAL.txt "HOJA RUTA"
+¿Cuál es el riesgo?                          DIAGRAMA_VISUAL.txt "RISK MATRIX"
+Si algo explota                               PLAN_ROLLBACK.txt "ESCENARIOS"
+Tests que debo correr                         PLAN_ROLLBACK.txt "TESTING"
+Backward compatibility                        PLAN_ROLLBACK.txt "ESCENARIO 7"
+Funciones a eliminar                          UNIFICACION_FUNCIONES.txt PASO 2-5
+
+════════════════════════════════════════════════════════════════════════════════
+CHECKLIST ANTES DE EMPEZAR
+════════════════════════════════════════════════════════════════════════════════
+
+☐ Leíste al menos:
+  ☐ INDICE_EJECUTIVO.txt (este archivo) - 5 min
+  ☐ DIAGRAMA_VISUAL.txt (entender visualmente) - 10 min
+
+☐ Tienes setup correcto:
+  ☐ clasp instalado
+  ☐ Repositorio local sincronizado (clasp pull)
+  ☐ Git inicializado (si quieres rollback fácil)
+  ☐ Backup local creado (backup_3marzo_2026/)
+
+☐ Tienes planes de contingencia:
+  ☐ Leíste PLAN_ROLLBACK.txt PASO 0 (backup)
+  ☐ Leíste PLAN_ROLLBACK.txt ESCENARIOS (sé qué hacer si falla)
+  ☐ Contactos de emergencia claros
+
+☐ Equipo alineado:
+  ☐ PM/TL leyó INDICE_EJECUTIVO.txt
+  ☐ TL/Senior leyó ANALISIS_FUNCIONES.txt
+  ☐ Developer leyó REFACTORIZACION.txt
+  ☐ QA leyó PLAN_ROLLBACK.txt "TESTING"
+
+═══════════════════════════════════════════════════════════════════════════════
+SIGUIENTE PASO
+════════════════════════════════════════════════════════════════════════════════
+
+Depende de tu rol:
+
+Si eres PM/TL:
+  → Abre: INDICE_EJECUTIVO.txt (este, en la sección "PLAN DE IMPLEMENTACIÓN")
+  → Luego: DIAGRAMA_VISUAL.txt (para presentar al equipo)
+
+Si eres Developer:
+  → Abre: REFACTORIZACION_PASO_A_PASO.txt
+  → Junto a: QUICK_REFERENCE.txt (para copy/paste)
+  → Si algo falla: PLAN_ROLLBACK.txt
+
+Si eres QA:
+  → Abre: PLAN_ROLLBACK.txt sección "TESTING"
+  → Luego: REFACTORIZACION_PASO_A_PASO.txt PASO 7 (tests)
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                       ¡ESTÁS LISTO PARA EMPEZAR!                       ║
+║                                                                           ║
+║  Tienes todo documentado, código listo, plan de contingencia,           ║
+║  y guías para cada rol. Ahora: ¡HAZLO!                                 ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+════════════════════════════════════════════════════════════════════════════════

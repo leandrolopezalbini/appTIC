@@ -260,3 +260,74 @@ Google Apps Script por Senior Lead Developer & QA Auditor.
 Documento confidencial - Uso interno únicamente.
 
 ═══════════════════════════════════════════════════════════════════════════════
+
+
+falta que anteriormente tenia en 5_Operaciones.js:
+
+/** Cuenta notificaciones pendientes según el perfil que consulta. */
+function actualizarBadgeSolicitudes() {
+  const usuario = usuarioActivo();
+  const rol = OBTENER_ROL_USUARIO(usuario); // Aquí definimos 'rol'
+  let contador = 0;
+
+  if (rol === "SECRETARIO" || rol === "ADMIN") { // Usamos 'rol' directamente
+    const hojaSol = obtenerHoja("Solicitudes");
+    const datos = hojaSol.getDataRange().getValues();
+    // Filtramos filas donde el estado (columna F, índice 5) sea SOLICITADA
+    contador = datos.filter(fila => fila[5] === "SOLICITADA").length;
+  }
+  else if (rol === "TECNICO") { // Usamos 'rol' directamente
+    const hojaTareas = obtenerHoja("Tareas");
+    const datos = hojaTareas.getDataRange().getValues();
+    // Filtramos: Estado (índice 5) PENDIENTE y Perfil (índice 6) TECNICO
+    contador = datos.filter(fila => fila[5] === "PENDIENTE" && fila[6] === "TECNICO").length;
+  }
+
+  return contador;
+}
+
+en el buscador, prefiero que se seleccionen con chek donde buscar.
+Actualmente es:
+   <div class="col s12 center-align">
+     <button type="button" class="btn-small chip waves-effect" onclick="ejecutarBusquedaMaestra('TODO')">Todos <span id="count-TODO"></span>
+     </button>
+     <button type="button" class="btn-small chip blue white-text waves-effect" onclick="ejecutarBusquedaMaestra('CAMARAS')">Cámaras <span id="count-CAMARAS"></span>
+     </button>
+     <button type="button" class="btn-small chip green white-text waves-effect" onclick="ejecutarBusquedaMaestra('TABLEROS')">Tableros <span id="count-TABLEROS"></span>
+     </button>
+     <button type="button" class="btn-small chip orange white-text waves-effect" onclick="ejecutarBusquedaMaestra('ALARMAS')">Alarmas <span id="count-ALARMAS"></span>
+     </button>
+     <button type="button" class="btn-small chip purple white-text waves-effect" onclick="ejecutarBusquedaMaestra('TAREAS')">Tareas <span id="count-TAREAS"></span>
+     <button type="button" class="btn-small chip purple white-text waves-effect" onclick="ejecutarBusquedaMaestra('SOLICITUDES')">Solicitudes <span id="count-SOLICITUDES"></span>
+     </button>
+   </div>
+
+          
+Antes era:
+   <div id="filtrosBusqueda" style="margin-bottom: 15px;">
+     <label><input type="checkbox" class="filled-in" value="TABLEROS" checked />
+                     <span>Tableros</span></label>
+     <label><input type="checkbox" class="filled-in" value="CAMARAS" checked />
+                     <span>Cámaras</span></label>
+     <label><input type="checkbox" class="filled-in" value="SWITCHES" checked />
+                     <span>Switches</span></label>
+     <label><input type="checkbox" class="filled-in" value="ALARMAS" />
+                     <span>Alarmas</span></label>
+     <label><input type="checkbox" class="filled-in" value="TAREAS" />
+                     <span>Tareas</span></label>
+   </div>
+
+- El boton de Taresas / Incidencias deberia tener un contador si el rol tiene tareas pendientes.
+al abrirse, debe mostrar el lisado y al ingresar. Poder marcar como Tarea realizada. o derivarla a otro rol.
+<div class="boton-tarjeta tarjeta-tareas" data-page="tareas">
+        <i class="material-icons">assignment</i><span>Tareas / Incidencias</span>
+      </div>
+
+- Debe mostrar la cantidad de solicitudes a autorizar tambien:
+      <div id="btn-ver-solicitudes" class="boton-tarjeta tarjeta-solicitudes" data-page="solicitudes"
+        style="display:none;">
+        <i class="material-icons">notifications_active</i>
+        <span>Solicitudes Pendientes</span>
+        <span id="badge-solicitudes" class="new badge red" style="display:none;">0</span>
+      </div>
+   Debe tener las opciones para marcar como "Solicitada" "Realizada" 

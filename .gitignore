@@ -1,0 +1,13 @@
+#*.txt
+#*.html
+!Panel.html  # Queremos que Panel.html SÍ se suba, el signo "!" lo exceptúa
+
+# Ignorar archivos de configuración de Clasp que tengan credenciales
+.clasp.json
+node_modules/
+
+# Archivos de sistema y logs
+*.log
+.DS_Store
+Thumbs.db
+

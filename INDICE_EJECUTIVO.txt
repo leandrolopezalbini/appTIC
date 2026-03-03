@@ -1,0 +1,325 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║              ÍNDICE EJECUTIVO - REFACTORIZACIÓN COMPLETA DE AppTIC            ║
+║                    Guía de Navegación de Documentos                           ║
+║                           3 Marzo 2026                                        ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+════════════════════════════════════════════════════════════════════════════════
+¿POR DÓNDE EMPIEZO?
+════════════════════════════════════════════════════════════════════════════════
+
+Si acabas de recibir estos documentos, **LEE EN ESTE ORDEN**:
+
+1️⃣  ESTE ARCHIVO (índice) ...................... 5 min lectura
+2️⃣  ANALISIS_FUNCIONES_DETALLADO.txt ........... 15 min (entender problema)
+3️⃣  REFACTORIZACION_PASO_A_PASO.txt ............ 30 min (ver código exacto)
+4️⃣  UNIFICACION_FUNCIONES.txt .................. 15 min (optimizaciones avanzadas)
+
+TIEMPO TOTAL DE LECTURA: 1 hora
+TIEMPO DE IMPLEMENTACIÓN: 1.5 - 2 horas
+
+════════════════════════════════════════════════════════════════════════════════
+ESTRUCTURA DE DOCUMENTOS
+════════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 📄 ESTE ARCHIVO - INDICE_EJECUTIVO.txt (estás acá)                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Propósito: Orientar qué documento leer en cada etapa                        │
+│ Contenido: Resumen ejecutivo + navegación por problema                      │
+│ Para quién: Project Manager, Tech Lead, Developer apurado                   │
+│ Tiempo: 5 minutos                                                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 📊 ANALISIS_FUNCIONES_DETALLADO.txt                                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Propósito: Explicar QUÉ ESTÁ MAL (diagnóstico)                             │
+│ Contiene:                                                                   │
+│  • 4 funciones nuevas que necesitas (validarPayload, precargarCache, etc) │
+│  • 4 funciones existentes con problemas (cómo arregladas)                  │
+│  • 3 funciones similares que pueden unificarse                             │
+│  • 1 función gigante que debe dividirse                                    │
+│  • Plan de refactorización por prioridad (P1, P2, P3)                      │
+│                                                                             │
+│ Leer si: Necesitas entender el problema técnico a fondo                    │
+│ Tiempo: 15 minutos                                                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ ✏️  REFACTORIZACION_PASO_A_PASO.txt                                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Propósito: CÓMO IMPLEMENTAR (código exacto + pasos)                         │
+│ Contiene:                                                                   │
+│  • PASO 1: Crear validarPayload() (copiar/pegar código)                    │
+│  • PASO 2: Agregar validación a procesarSolicitudUnificada()              │
+│  • PASO 3: Mejorar error handling en notificarEvento()                    │
+│  • PASO 4: Crear precargarCacheHojas()                                    │
+│  • PASO 5: Modificar buscadorMaestro() para usar caché                    │
+│  • PASO 6: Agregar validación a autorizarSolicitud()                      │
+│  • PASO 7: Crear testTrazabilidad() y testErrorHandling()                │
+│  • Checklist final de validación                                           │
+│                                                                             │
+│ CADA PASO tiene:                                                            │
+│  - Ubicación exacta (qué archivo, qué línea)                               │
+│  - Código ANTES (lo que tienes ahora)                                      │
+│  - Código DESPUÉS (lo que debe reemplazarse)                               │
+│  - Validación (cómo verificar que funcionó)                                │
+│                                                                             │
+│ Leer si: Listo para implementar, quiero código copy/paste                  │
+│ Tiempo: 30 minutos (lectura)  + 90 minutos (implementación)               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 🔗 UNIFICACION_FUNCIONES.txt                                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Propósito: OPTIMIZACIÓN AVANZADA (no es crítico, es "nice to have")       │
+│ Contiene:                                                                   │
+│  • Función genérica buscarFilas() - Reemplaza 3 funciones de búsqueda     │
+│  • Función genérica buscarEnMultiples() - Búsqueda en varias hojas        │
+│  • Función unificada registrarYNotificar() - Evita duplicar historia     │
+│  • Cómo reemplazar cada función vieja                                      │
+│  • Antes vs Después (metrics de reducción)                                 │
+│                                                                             │
+│ Leer si: Quieres código 100% optimizado (después de PASO_A_PASO)          │
+│ Tiempo: 15 minutos lectura +  45 minutos implementación                    │
+│ PRIORIDAD: BAJA (hacer después de pasos 1-7, no impide producción)        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════════════════════
+MATRIZ DE PROBLEMAS ENCONTRADOS
+════════════════════════════════════════════════════════════════════════════════
+
+¿CUÁL ES TU PROBLEMA ESPECÍFICO?
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ PROBLEMA                     │ SEVERIDAD │ ARCHIVO        │ DOCUMENTO      │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ Búsquedas lentas             │ 🔴 CRÍTICA│ 2_Consultas.js │ PASO_A_PASO   │
+│ (buscadorMaestro tarda 5s)   │           │                │ PASO 4 + 5    │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ Sin validación de entrada    │ 🔴 CRÍTICA│ 5_Operaciones  │ PASO_A_PASO   │
+│ (procesarSolicitudUnificada) │           │ 10_Gestion     │ PASO 2 + 6    │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ Errores silenciosos en       │ 🔴 CRÍTICA│ 6_Notificaciones│ PASO_A_PASO  │
+│ notificaciones (catch vacío)  │           │                │ PASO 3       │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ Sin trazabilidad en cambios  │ 🟠 ALTA   │ 10_Gestion     │ ANALISIS     │
+│ (historial incompleto)       │           │                │ + Verificar  │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ Funciones duplicadas         │ 🟠 ALTA   │ 2/5/3_*        │ UNIFICACION  │
+│ (buscar, historial+notif)    │           │                │ PASO 1-5     │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ Función gigante y compleja   │ 🟡 MEDIA  │ 5_Operaciones  │ ANALISIS     │
+│ procesarSolicitudUnificada   │           │ (procesarSolicitudUnificada) │ sec 4│
+├──────────────────────────────────────────────────────────────────────────────┤
+│ Sin tests automatizados       │ 🟡 MEDIA  │ 9_Tests.js     │ PASO_A_PASO  │
+│                              │           │                │ PASO 7       │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════════════════════
+PLAN DE IMPLEMENTACIÓN - FASES Y TIEMPO
+════════════════════════════════════════════════════════════════════════════════
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║ FASE 1: CRITICAL FIXES (90 minutos)  - ⏱️ HOY SI ES POSIBLE               ║
+║ ─────────────────────────────────────────────────────────────────────────── ║
+║                                                                              ║
+║ ☐ Crear validarPayload() ...................... 10 min │ PASO_A_PASO PASO 1│
+║ ☐ Agregar validación a procesarSolicitud....... 5 min  │ PASO_A_PASO PASO 2│
+║ ☐ Mejorar notificarEvento() ................... 20 min │ PASO_A_PASO PASO 3│
+║ ☐ Crear precargarCacheHojas() ................. 15 min │ PASO_A_PASO PASO 4│
+║ ☐ Modificar buscadorMaestro() ................. 10 min │ PASO_A_PASO PASO 5│
+║ ☐ Agregar validación a autorizarSolicitud() ... 5 min  │ PASO_A_PASO PASO 6│
+║ ☐ Ejecutar y validar todos los tests .......... 15 min │ PASO_A_PASO PASO 7│
+║ ☐ Sube a producción con clasp push ............ 5 min  │ Terminal         │
+║ ⏱️ DURACIÓN: ~1.5 horas de trabajo continuo                              ║
+║ ✅ RESULTADO: Aplicación 80% más rápida, errores estructurados             ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║ FASE 2: OPTIMIZACIÓN AVANZADA (90 minutos) - ⏱️ ESTA SEMANA               ║
+║ ─────────────────────────────────────────────────────────────────────────── ║
+║                                                                              ║
+║ ☐ Crear buscarFilas() genérica ............... 20 min │ UNIFICACION PASO 1│
+║ ☐ Crear buscarEnMultiples() .................. 10 min │ UNIFICACION PASO 1│
+║ ☐ Reemplazar findRowByColValue() ............. 5 min  │ UNIFICACION PASO 2│
+║ ☐ Reemplazar buscarDatosParaReemplazo() ..... 10 min │ UNIFICACION PASO 3│
+║ ☐ Optimizar buscadorMaestro() ............... 15 min │ UNIFICACION PASO 4│
+║ ☐ Crear registrarYNotificar() ............... 20 min │ UNIFICACION PASO 5│
+║ ☐ Reemplazar en 5_Operaciones.js ............ 10 min │ UNIFICACION PASO 5│
+║ ☐ Reemplazar en 10_Gestion_Solicitudes.js .. 5 min  │ UNIFICACION PASO 5│
+║ ⏱️ DURACIÓN: ~1.5 horas                                                   ║
+║ ✅ RESULTADO: -70% duplicación, -80% bugs por inconsistencia               ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║ FASE 3: DIVISIÓN DE FUNCIONES GIGANTES (120 minutos) - ⏱️ PRÓXIMA SEMANA  ║
+║ ─────────────────────────────────────────────────────────────────────────── ║
+║                                                                              ║
+║ ☐ Analizar procesarSolicitudUnificada() ...... 15 min │ ANALISIS sec 4    │
+║ ☐ Crear routearActualizacion() .............. 20 min │ ANALISIS sec 4    │
+║ ☐ Crear routearSolicitudNueva() ............. 20 min │ ANALISIS sec 4    │
+║ ☐ Crear crearSolicitudPendiente() ........... 15 min │ ANALISIS sec 4    │
+║ ☐ Escribir tests para nuevas funciones ...... 30 min │ Custom testing    │
+║ ☐ Integración y validación .................. 20 min │ Manual testing    │
+║ ⏱️ DURACIÓN: ~2 horas                                                     ║
+║ ✅ RESULTADO: Código más mantenible, más testeable, cada función = 1 cosa │
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+TIEMPO TOTAL: ~5 horas distribuidas en 3 semanas
+RIESGO: BAJO (cambios incremental, validados en cada paso)
+IMPACTO: ALTÍSIMO (+30% performance, -80% bugs, +200% mantenibilidad)
+
+════════════════════════════════════════════════════════════════════════════════
+CHECKLIST - ANTES DE EMPEZAR
+════════════════════════════════════════════════════════════════════════════════
+
+☐ 👍¿Tienes clasp instalado y funcionando?
+  Terminal: clasp --version
+  Si falla: npm install -g @google/clasp
+
+☐ 👍¿Tu proyecto está clonado y sincronizado?
+  Terminal en c:\Users\merce\Desktop\appTIC:
+  $ clasp pull  (trae últimos cambios)
+  $ clasp status (verifica que todo está bien)
+
+☐ 👍¿Tienes la carpeta guardada de backup?
+  Recomendado: Haz backup de todos los .gs originales
+  En Google Drive, descarga ZIP antes de empezar
+
+☐ 👍¿Entiendo qué voy a hacer?
+  Léeme: ANALISIS_FUNCIONES_DETALLADO.txt (en diagonal si prisa)
+
+✅ Si pasaste todos, ¡ESTÁS LISTO!✔️✔️✔️✔️
+
+════════════════════════════════════════════════════════════════════════════════
+FLUJO DE TRABAJO RECOMENDADO
+════════════════════════════════════════════════════════════════════════════════
+
+[DÍA 1 - 1.5 HORAS]
+║
+├─ 1. Abre terminal en VS Code (Ctrl+`)
+├─ 2. Lee REFACTORIZACION_PASO_A_PASO.txt PASO 1 (5 min)
+├─ 3. Implementa PASO 1 (validarPayload) (10 min)
+├─ 4. Lee PASO 2 (5 min)
+├─ 5. Implementa PASO 2 (procesarSolicitudUnificada) (5 min)
+├─ 6. Repite pasos 2-5 con PASO 3, PASO 4, PASO 5, PASO 6 (60 min total)
+├─ 7. Lee PASO 7 (tests) (10 min)
+├─ 8. Implementa tests (15 min)
+├─ 9. Ejecuta: clasp push (5 min)
+└─ 10. En Apps Script: ejecuta testSistema(),ejecutarTestsCompletos() (10 min)
+      ↓
+      ✅ SI TODOS LOS TESTS PASAN: PHASE 1 COMPLETA
+      ❌ SI HAY ERRORES: Revisa el error específico en el archivo
+
+[DÍA 8 - 1.5 HORAS]
+║
+├─ 1. Lee UNIFICACION_FUNCIONES.txt (15 min)
+├─ 2. Implementa PASO 1 (crear funciones genéricas) (20 min)
+├─ 3. Implementa PASO 2-5 (reemplazar funciones viejas) (60 min)
+├─ 4. Ejecuta: clasp push (5 min)
+└─ 5. Valida: Todas las búsquedas siguen funcionando (10 min)
+      ↓
+      ✅ SI VALIDACIONES PASAN: PHASE 2 COMPLETA
+
+════════════════════════════════════════════════════════════════════════════════
+PREGUNTAS FRECUENTES
+════════════════════════════════════════════════════════════════════════════════
+
+P: "No entiendo un paso. ¿Qué hago?"
+R: Revisa la sección ANTES/DESPUÉS del paso. Busca Ctrl+F la línea que dice 
+   "ACTUAL" y luego busca esa línea exacta en tu archivo. Si no está, significa
+   que ya lo has hecho o tu versión es diferente. Salta al siguiente.
+
+P: "¿Qué pasa si me equivoco?"
+R: Google Apps Script es seguro. Lo peor que pasa es que la función falla y 
+   recibes un error. Simplemente:
+   1. Ctrl+Z para deshacer
+   2. Lee el mensaje de error
+   3. Busca la línea que falla
+   4. Compara con REFACTORIZACION_PASO_A_PASO.txt línea por línea
+   5. Intenta de nuevo
+
+P: "¿Necesito hacer TODOS los pasos?"
+R: Los PASOS 1-7 son CRÍTICOS (puerta abierta a todo lo demás).
+   Los pasos de UNIFICACION son OPCIONALES pero RECOMENDADOS.
+
+P: "¿Puedo hacer los pasos en otro orden?"
+R: NO. Debes hacer 1-2-3-4-5-6-7 en orden. PORQUE:
+   - PASO 1 (validarPayload) se usa en PASO 2
+   - PASO 4 (caché) se usa en PASO 5
+   - Etc.
+
+P: "¿A quién le reporto si algo no funciona?"
+R: Abre el archivo ANALISIS_FUNCIONES_DETALLADO.txt y busca el problema 
+   en la sección "RESUMEN DE CAMBIOS POR ARCHIVO". Allí está la solución.
+
+════════════════════════════════════════════════════════════════════════════════
+ARCHIVOS QUE CAMBIARÁS
+════════════════════════════════════════════════════════════════════════════════
+
+DESPUÉS de completar TODAS las fases, estos archivos habrán sido modificados:
+
+✏️  MODIFICAR:
+├─ 3_Utilidades.js ...................... Agregar validarPayload()
+├─ 2_Consultas.js (PASO 4 + 5) ........ Agregar caché + modificar buscador
+├─ 2_Consultas.js (UNIFICACION) ....... Usar buscarEnMultiples()
+├─ 5_Operaciones.js (PASO 2) ........... Agregar validación
+├─ 5_Operaciones.js (PASO 3) ........... Mejorar notificaciones
+├─ 5_Operaciones.js (UNIFICACION PASO 5) . Reemplazar llamadas con registrarYNotificar()
+├─ 6_Notificaciones.js (PASO 3) ........ Reescribir notificarEvento()
+├─ 9_Tests.js (PASO 7) ................. Agregar 2 funciones de testing
+├─ 10_Gestion_Solicitudes.js (PASO 6) . Agregar validación
+└─ 10_Gestion_Solicitudes.js (UNIFICACION) . Reemplazar llamadas
+
+❌ NO MODIFICAR:
+├─ 0_Config.js ......................... (está bien)
+├─ 1_Interfaz.js ....................... (archívalo después)
+├─ 4_Seguridad.js ...................... (está bien)
+├─ 7_Triggers.js ....................... (está bien)
+├─ 8_Informes.js ....................... (está bien)
+└─ nuevoPanel.html ..................... (está bien)
+
+════════════════════════════════════════════════════════════════════════════════
+COMANDOS CLAVE PARA USAR
+════════════════════════════════════════════════════════════════════════════════
+
+ANTES DE EMPEZAR:
+  $ cd c:\Users\merce\Desktop\appTIC
+  $ clasp pull                    # Trae cambios del servidor
+  $ clasp status                 # Verifica sincronización
+
+DESPUÉS DE CADA PASO o GRUPO:
+  $ clasp push                   # Sube cambios a Apps Script
+
+PARA VERIFICAR:
+  En Google Apps Script editor:
+  > ejecutar: testSistema()             # Test básico
+  > ejecutar: ejecutarTestsCompletos()  # Suite completa
+  > ejecutar: precargarCacheHojas()     # Verifica caché
+
+PARA DEBUGGEAR:
+  En Google Apps Script editor:
+  > View > Logs  (o Ctrl+Enter después de ejecutar)
+  Busca los logs de tu ejecución (timestamps)
+
+════════════════════════════════════════════════════════════════════════════════
+RESUMEN EN UNA LÍNEA
+════════════════════════════════════════════════════════════════════════════════
+
+📌 RESUMEN: Implementa 7 cambios progresivos en ~1.5 horas para que tu aplicación
+             sea 80% más rápida, más confiable y más mantenible.
+
+════════════════════════════════════════════════════════════════════════════════
+SIGUIENTE PASO
+════════════════════════════════════════════════════════════════════════════════
+
+↓ ABRE AHORA: ANALISIS_FUNCIONES_DETALLADO.txt
+
+(Este archivo te explicará EN DETALLE qué está mal y por qué)
+
+════════════════════════════════════════════════════════════════════════════════

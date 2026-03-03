@@ -1,0 +1,423 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                       PLAN DE ROLLBACK / CONTINGENCIA                        ║
+║                    Qué hacer si algo falla en producción                     ║
+║                           3 Marzo 2026                                       ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+════════════════════════════════════════════════════════════════════════════════
+ANTES DE EMPEZAR - PREPARACIÓN CRÍTICA
+════════════════════════════════════════════════════════════════════════════════
+
+⚠️  PASO 0 - BACKUP (HACER AHORA, ANTES DE CUALQUIER CAMBIO)
+
+En tu máquina local:
+  $ cd c:\Users\merce\Desktop\appTIC
+  $ mkdir backup_3marzo_2026
+  $ cp *.js backup_3marzo_2026/
+
+En Google Drive (proyecto Apps Script):
+  1. Abre el proyecto en apps.google.com/script
+  2. Proyecto → Configuración del proyecto
+  3. Descarga ZIP de código (si está disponible)
+  4. O en cada archivo: copia el contenido a un Doc de Google con timestamp
+
+────────────────────────────────────────────────────────────────────────────
+
+VERSIONES A GUARDAR:
+
+Versión Original (ANTES de cambios):
+  ├─ 2_Consultas.js (línea 201 original)
+  ├─ 3_Utilidades.js (sin validarPayload)
+  ├─ 5_Operaciones.js (sin validación en procesarSolicitud)
+  ├─ 6_Notificaciones.js (con catch vacío)
+  ├─ 9_Tests.js (sin nuevos tests)
+  └─ 10_Gestion_Solicitudes.js (sin validación)
+
+════════════════════════════════════════════════════════════════════════════════
+ESCENARIOS DE FALLO Y SOLUCIONES RÁPIDAS
+════════════════════════════════════════════════════════════════════════════════
+
+ESCENARIO 1: "Error: validarPayload is not defined"
+──────────────────────────────────────────────────────────────────────────────
+
+CAUSA: La función no se copiió correctamente a 3_Utilidades.js
+
+DIAGNÓSTICO RÁPIDO:
+  1. En Apps Script: Ctrl+F → "function validarPayload"
+  2. ¿NO aparece? → Pasó para abajo
+
+SOLUCIÓN INMEDIATA (sin rollback):
+  1. Abre 3_Utilidades.js en VS Code
+  2. Ve al FINAL del archivo
+  3. Copia nuevamente el código completo de validarPayload() de QUICK_REFERENCE.txt
+  4. clasp push
+  5. En Apps Script editor: Proyectos > Ejecutar > validarPayload
+  6. Si aparece sin error → Listo
+
+ROLLBACK COMPLETO (si nada funciona):
+  1. $ clasp pull  (trae versión de servidor)
+  2. $ git checkout 3_Utilidades.js  (restaura versión OLD si usas Git)
+  3. $ clasp push
+
+════════════════════════════════════════════════════════════════════
+ESCENARIO 2: "TypeError: CACHE_SHEETS is undefined"
+──────────────────────────────────────────────────────────────────────────────
+
+CAUSA: No copiaste CACHE_SHEETS + precargarCacheHojas() al INICIO
+
+DIAGNÓSTICO RÁPIDO:
+  1. Abre 2_Consultas.js
+  2. Ctrl+Home (inicio del archivo)
+  3. ¿Ves "let CACHE_SHEETS = {}" en las primeras 5 líneas? ¿NO? → Aquí está el problema
+
+SOLUCIÓN INMEDIATA:
+  1. VS Code: Ctrl+Home para ir al inicio de 2_Consultas.js
+  2. Antes de "function buscadorMaestro()", pega el código de QUICK_REFERENCE.txt
+     (Todo ese bloque: CACHE_SHEETS, precargarCacheHojas, limpiarCache)
+  3. clasp push
+  4. En Apps Script: ejecuta > precargarCacheHojas()
+  5. Ve los logs (Ctrl+Enter o View > Logs)
+  6. Si ves "✅ Caché de hojas precargado completamente" → Listo
+
+ROLLBACK:
+  Simplemente comenta las 4 líneas de CACHE_SHEETS + funciones
+  Cambia buscadorMaestro() de vuelta a usar getDataRange()
+
+════════════════════════════════════════════════════
+ESCENARIO 3: "aplicación lenta, búsqueda tarda 5 segundos"
+──────────────────────────────────────────────────────────────────────────────
+
+CAUSA: Caché no se ejecutó antes, o búsqueda no usa caché
+
+DIAGNÓSTICO:
+  1. En Apps Script: ejecuta > precargarCacheHojas()
+  2. Luego: ejecuta > buscadorMaestro("001")
+  3. Timer: cuánto tardó?
+     - < 500ms = correcto
+     - > 1 segundo = problema
+
+PROBLEMA: buscadorMaestro() sigue usando hoja.getDataRange()
+
+SOLUCIÓN:
+  1. Abre 2_Consultas.js
+  2. Ctrl+F → "const data = hoja.getDataRange()"
+  3. Bajo la línea anterior, ¿Ves "for (let tipo of tipos_busqueda)"?
+  4. Si la respuesta es NO → No has hecho PASO 5, hazlo ahora
+  5. Si SÍ → Reemplaza esas 2 líneas con:
+     
+     const data = CACHE_SHEETS[tipo];
+     if (!data || data.length <= 1) continue;
+
+  6. clasp push
+  7. Prueba de nuevo: buscadorMaestro() debe ser < 300ms
+
+ROLLBACK:
+  Restaura PASO 5 a su versión anterior (sin caché)
+
+════════════════════════════════════════════════════════════════════
+ESCENARIO 4: "Errores silenciosos en procesarSolicitudUnificada()"
+──────────────────────────────────────────────────────────────────────────────
+
+CAUSA: Payload vacío no se rechaza (no agregaste validarPayload)
+
+DIAGNÓSTICO:
+  En Apps Script: 
+  > procesarSolicitudUnificada({})
+  
+  Respuesta MALA: { success: true } o crash confuso
+  Respuesta BUENA: { success: false, errorCode: "INVALID_PAYLOAD", message: "..." }
+
+SOLUCIÓN:
+  1. Abre 5_Operaciones.js
+  2. Ctrl+F → "function procesarSolicitudUnificada"
+  3. Línea 9 (justo después de "try {"), ¿Ves "const validacion = validarPayload"?
+  4. Si NO → Agrega esas líneas ahora (ver REFACTORIZACION_PASO_A_PASO.txt PASO 2)
+  5. clasp push
+  6. Prueba de nuevo: procesarSolicitudUnificada({}) debe retornar error
+
+ROLLBACK:
+  Elimina esas 4 líneas nuevas de validación
+
+════════════════════════════════════════════════════════════════════
+ESCENARIO 5: "notificarEvento() no retorna resultado"
+──────────────────────────────────────────────────────────────────────────────
+
+CAUSA: Reemplazó parcialmente la función (no completamente)
+
+DIAGNÓSTICO:
+  En Apps Script:
+  > const r = notificarEvento("TEST_EVENTO", {id: "X"})
+  > console.log(r)
+  
+  Respuesta MALA: undefined o true (valor simple)
+  Respuesta BUENA: { success: true, enviados: [...], fallos: [...] }
+
+SOLUCIÓN RÁPIDA:
+  1. Abre 6_Notificaciones.js
+  2. Ctrl+F → "function notificarEvento"
+  3. REEMPLAZA la FUNCIÓN COMPLETA (desde "function notificarEvento" hasta el último "}")
+  4. Con el código de QUICK_REFERENCE.txt (notificarEvento NUEVA)
+  5. clasp push
+  6. Prueba: const r = notificarEvento(...) debe tener r.success, r.enviados
+
+ROLLBACK:
+  Restaura la función vieja de backup_3marzo_2026/6_Notificaciones.js
+
+════════════════════════════════════════════════════════════════════
+ESCENARIO 6: "Tests fallan con errores confusos"
+──────────────────────────────────────────────────────────────────────────────
+
+CAUSA: Tests se copiaron mal, o hay error en lógica
+
+DIAGNÓSTICO:
+  En Apps Script:
+  > ejecutar: ejecutarTestsCompletos()
+  > Ver logs (Ctrl+Enter)
+  
+  Busca: ❌ FALLO en algún test
+
+SOLUCIÓN (según qué test falla):
+
+  Si falla testErrorHandling:
+    → Problema en validarPayload() o estructura de notificarEvento()
+    → Revisa ESCENARIOS 1 y 5
+
+  Si falla testTrazabilidad:
+    → Problema en acceso a Historial
+    → Verifica que existe la hoja NOMBRE_HOJA.HISTORIAL en 0_Config.js
+    → Si no, agrega la hoja y corre test de nuevo
+
+  General:
+    → Abre 9_Tests.js
+    → Ctrl+F → "function testErrorHandling"
+    → Compara línea por línea con QUICK_REFERENCE.txt
+    → Copia nuevamente si hay diferencias
+
+ROLLBACK:
+  Elimina testTrazabilidad() y testErrorHandling() de 9_Tests.js
+
+════════════════════════════════════════════════════════════════════
+ESCENARIO 7: "Frontend está roto después de cambios"
+──────────────────────────────────────────────────────────────────────────────
+
+CAUSA: Cambio de estructura en respuestas (notificarEvento, procesarSolicitud)
+
+DIAGNÓSTICO:
+  En el navegador:
+  1. Panel abre pero botones no funcionan
+  2. Console del navegador (F12) muestra errores
+
+SOLUCIÓN (Compatibilidad):
+  Si frontend espera "result.success" pero ahora recibe "resultado.success":
+  
+  Opción A: Actualiza FRONTEND para esperar nueva estructura
+  Opción B: Agrega wrapper para backward compatibility:
+  
+    function procesarSolicitudUnificada_Compatible(data) {
+      const resultado = procesarSolicitudUnificada(data);
+      return {
+        success: resultado.success,
+        message: resultado.message,
+        errorCode: resultado.errorCode,
+        // ... (campos que frontend espera)
+      };
+    }
+
+ROLLBACK COMPLETO:
+  Si frontend está completamente roto:
+  1. $ clasp pull (trae versión del servidor sin tus cambios)
+  2. Todos volverán a la versión antigua
+  3. Los cambios en tu máquina local quedan, pero no en el servidor
+
+════════════════════════════════════════════════════════════════════
+ESCENARIO 8: "Accidente: Borraste código importante"
+──────────────────────────────────────────────────────────────────────────────
+
+DIAGNÓSTICO: Ves que falta una función completa o hay errores de sintaxis
+
+SOLUCIÓN INMEDIATA:
+  1. $ clasp pull (trae última versión del servidor)
+  2. Compara con tu versión local (diff)
+  3. Copia de vuelta lo que falta
+
+O:
+  1. En VS Code: Ctrl+Z (undo) múltiples veces
+  2. Hasta volver a punto seguro
+
+O:
+  1. $ git checkout <archivo>.js (si usas Git)
+
+════════════════════════════════════════════════════════════════════════════════
+PLAN DE ROLLBACK FASE POR FASE
+════════════════════════════════════════════════════════════════════════════════
+
+Si algo falla en FASE 1 (Pasos 1-7):
+──────────────────────────────────────────────────────────────────────────
+
+┌─────────────────────────────────────────────────────────────────╗
+│ ROLLBACK RÁPIDO (60 segundos):                                 │
+│                                                                 │
+│ 1. En terminal: $ clasp pull                                  │
+│ 2. Espera a que descargue (10 seg)                           │
+│ 3. Revisa si error desapareció                               │
+│                                                                 │
+│ Si NO desapareció → Restaura ARCHIVO ESPECÍFICO:              │
+│ 1. $ git checkout 5_Operaciones.js  (ejemplo, archivo culpable)
+│ 2. $ clasp push                                               │
+│ 3. Listo                                                       │
+│                                                                 │
+│ Si GIT no está disponible → Copia de backup/:                 │
+│ 1. Abre backup_3marzo_2026/5_Operaciones.js                  │
+│ 2. Copia TODO el contenido                                    │
+│ 3. En VS Code, 5_Operaciones.js, Ctrl+A, pega               │
+│ 4. $ clasp push                                               │
+└─────────────────────────────────────────────────────────────────┘
+
+Si algo falla después de FASE 1 (durante FASE 2 u después):
+──────────────────────────────────────────────────────────────────────────
+
+OPCIÓN A: Rollback individual (10 minutos)
+  $ git checkout 2_Consultas.js     (rollback archivo actual)
+  $ git checkout 3_Utilidades.js
+  $ clasp push
+
+OPCIÓN B: Rollback completo a versión antes de FASE 1 (5 minutos)
+  $ git reset --hard HEAD~7  (vuelve a 7 commits atrás)
+  $ clasp push
+
+OPCIÓN C: Restaurar desde respaldo (3 minutos)
+  $ rm *.js
+  $ cp backup_3marzo_2026/*.js .
+  $ clasp push
+
+════════════════════════════════════════════════════════════════════════════════
+TESTING ANTES DE PRODUCCIÓN
+════════════════════════════════════════════════════════════════════════════════
+
+ANTES DE DECIR "ESTÁ LISTO":
+
+☐ PASO 1: Verificar que NO hay errores en código
+  En Apps Script:
+  > Proyecto → Validar proyecto
+  > Debe mostrar 0 errores
+
+☐ PASO 2: Ejecutar todos los tests
+  > ejecutar: ejecutarTestsCompletos()
+  > Logs deben mostrar ✅ PASÓ en TODOS los tests
+
+☐ PASO 3: Manual testing (smoke test)
+  - [ ] Panel abre correctamente
+  - [ ] Búsqueda funciona rápido (< 1 seg)
+  - [ ] Crear solicitud funciona
+  - [ ] Autorización funciona
+  - [ ] Notificaciones se envían
+  - [ ] Email de notificación recibido
+
+☐ PASO 4: Verificar datos en Sheets
+  - [ ] Historial tiene nuevos registros
+  - [ ] Activos se actualizaron correctamente
+  - [ ] No hay rows duplicadas
+
+Si TODO pasa: ✅ SEGURO DEPLOYAR A PRODUCCIÓN
+
+════════════════════════════════════════════════════════════════════════════════
+MONITOREO POST-DEPLOYMENT
+════════════════════════════════════════════════════════════════════════════════
+
+DESPUÉS de deployar a producción:
+
+PRIMERAS 30 MINUTOS:
+  ☐ Monitorea errores en Logs (Apps Script)
+  ☐ Prueba funcionalidades core desde el panel
+  ☐ Verifica que notificaciones se envían
+  ☐ ¿Usuarios reportan problemas? Revisa escalación abajo
+
+PRÓXIMAS 24 HORAS:
+  ☐ Monitorea Historial: ¿se registran eventos?
+  ☐ Verifica búsquedas en tiempo real: ¿velocidad mantiene?
+  ☐ Echa vistazo a API quota usage (Google Apps Script > Resumen)
+  ☐ Si se agota rápido: Caché no funciona, revisa ESCENARIO 2
+
+════════════════════════════════════════════════════════════════════════════════
+ESCALACIÓN DE PROBLEMAS
+════════════════════════════════════════════════════════════════════════════════
+
+PRIORIDAD 🔴 CRÍTICO (Rollback INMEDIATO):
+  • Aplicación no abre (error 500)
+  • Todos los usuarios reportan fallo
+  • Datos se están perdiendo
+  
+  → Acción: $ clasp pull && git reset --hard HEAD
+
+PRIORIDAD 🟠 ALTO (Investigar en 1 hora):
+  • Algunas búsquedas fallan
+  • Algunos usuarios no reciben notificaciones
+  • Errores en Logs pero aplicación sigue funcionando
+  
+  → Acción: Ejecuta ejecutarTestsCompletos(), revisa ESCENARIOS 1-6
+
+PRIORIDAD 🟡 MEDIA (Investigar en 24 horas):
+  • Cosmético (interfaz se ve rara)
+  • Funcionalidad secundaria falla
+  • Performance no mejora como esperado
+  
+  → Acción: Investigar a fondo, no es urgente
+
+════════════════════════════════════════════════════════════════════════════════
+DOCUMENTO DE EVIDENCIA
+════════════════════════════════════════════════════════════════════════════════
+
+Para legal/auditoría, documentar:
+
+ANTES (baseline):
+  Busqueda time: ________ ms
+  Errores/día: __________
+  API quota/sem: ________
+  Historiall records: ____
+
+DESPUÉS:
+  Búsqueda time: ________ ms
+  Errores/día: __________
+  API quota/sem: ________
+  Historial records: ____
+
+METRICS:
+  Performance mejoró: ____ % (debería ser -80%)
+  Errors bajaron: _______ % (debería ser -100% para failsafe)
+  Quota mejoró: _________ % (debería ser -70%)
+
+════════════════════════════════════════════════════════════════════════════════
+CONTACTOS DE EMERGENCIA
+════════════════════════════════════════════════════════════════════════════════
+
+Si algo falla DESPUÉS de deployment y no puedes arreglarlo:
+
+Desarrollador Principal:
+  Nombre: _____________________
+  Teléfono: __________________
+  Email: ______________________
+
+Google Apps Script Support:
+  https://issuetracker.google.com/issues/new?component=187172&template=47428
+
+Community Forums:
+  https://stackoverflow.com/questions/tagged/google-apps-script
+
+════════════════════════════════════════════════════════════════════════════════
+CHECKLIST FINAL - ANTES DE IR A PRODUCCIÓN
+════════════════════════════════════════════════════════════════════════════════
+
+☐ Backup creado (backup_3marzo_2026/)
+☐ Git initialized (git status funciona)
+☐ clasp push funciona
+☐ Todos los 7 pasos completados sin errores
+☐ ejecutarTestsCompletos() muestra ✅ PASÓ en TODOS
+☐ Panel funciona manualmente (búsqueda, crear, autorizar)
+☐ Notificaciones se envían correctamente
+☐ Historial se actualiza
+☐ Este documento se imprimió/guardó
+☐ Equipo sabe qué hacer si falla
+
+✅ SI PASASTE TODO: LISTO PARA PRODUCCIÓN
+
+════════════════════════════════════════════════════════════════════════════════

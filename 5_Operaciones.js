@@ -7,53 +7,52 @@
 
 function procesarSolicitudUnificada(data) {
   try {
-    const usuario = usuarioActivo();
+    const usuario = usuarioActivo(); // Tu función de validación de sesión
     const rol = OBTENER_ROL_USUARIO(usuario);
 
     // --- BLOQUE 1: ACCIONES SOBRE ACTIVOS O TAREAS EXISTENTES ---
-    // Si la data trae un ID o ID de Tarea, es una actualización o reporte.
     if ((data.id || data.idTarea) && data.tipoAccion) {
       let resultado;
 
       switch (data.tipoAccion) {
         case 'FINALIZAR_INSTALACION':
-          resultado = finalizarInstalacionYCrearActivo(data);
+          // Llamamos a la función atómica que asegura que no se pierdan datos
+          resultado = ejecutarTransaccionInstalacion(data, usuario);
           break;
 
         case 'ACTUALIZAR_ENERGIA':
-          // Actualiza energía y genera ticket REQ- de insumos
           resultado = registrarEnergiaYPedidoMaterial(data);
           break;
 
         case 'REPORTE_COM':
-          // Crea un ticket TSK- en la hoja Tareas
           resultado = gestionarTarea(data.id, data.tipoFalla, data.observaciones, data.direccion, usuario);
           break;
 
         case 'MANTENIMIENTO_SITIO':
-          // Registra la intervención técnica
           resultado = registrarMantenimiento(data, usuario);
+          break;
+          
+        case 'ACTUALIZAR_HITO_INFRAESTRUCTURA':
+          // Nueva acción para el flujo del Secretario/Instalador
+          resultado = cambiarHitoInfraestructura(data.idTarea, data.nuevoHito, usuario, rol);
           break;
 
         default:
           throw new Error("Acción '" + data.tipoAccion + "' no reconocida.");
       }
       
-      // Aplicamos formato visual a la hoja de Solicitudes por si hubo cambios
       aplicarFormatoInsumos();
       return resultado; 
     }
 
     // --- BLOQUE 2: SOLICITUDES DE ALTA (NUEVOS DISPOSITIVOS) ---
-    // Si llegamos aquí, es porque NO hay un ID previo, es algo totalmente nuevo.
-
-    // A. Si es ADMIN o SECRETARIO, se crea el activo directamente (sin esperar aprobación)
+    // A. Si es ADMIN o SECRETARIO, se crea el activo directamente
     if (rol === "ADMIN" || rol === "SECRETARIO") {
       const resultadoAlta = ejecutarAltaDirecta(data, usuario);
       return { success: true, message: "Activo creado directamente. ID: " + resultadoAlta.id };
     }
 
-    // B. Para otros roles, se crea una SOLICITUD pendiente de aprobación
+    // B. Para otros roles (COM), se crea una SOLICITUD pendiente
     const fecha = new Date();
     const idSolicitud = "SOL-" + (data.tipoActivo || "ACT").substring(0, 3).toUpperCase() + "-" + Utilities.formatDate(fecha, "GMT-3", "yyMMdd-HHmm");
     
@@ -73,8 +72,77 @@ function procesarSolicitudUnificada(data) {
 
   } catch (e) {
     Logger.log("Error en procesarSolicitudUnificada: " + e.toString());
-    return { success: false, message: e.toString() };
+    return { success: false, message: "Error en el servidor: " + e.message };
   }
+}
+
+function cambiarHitoInfraestructura(idTarea, hito, usuario, rol) {
+  // Validamos que solo roles autorizados operen infraestructura
+  const rolesAutorizados = ["ADMIN", "SECRETARIO", "INSTALADOR", "TECNICO"];
+  if (!rolesAutorizados.includes(rol)) {
+    throw new Error("No tienes permisos para actualizar hitos de infraestructura.");
+  }
+
+  const hoja = obtenerHoja("Tareas");
+  const fila = findRowByColValue(hoja, "ID_Tarea", idTarea);
+  
+  if (fila === -1) throw new Error("No se encontró la tarea de infraestructura.");
+
+  const headers = hoja.getRange(1, 1, 1, hoja.getLastColumn()).getValues()[0];
+  const colEstado = getHeaderIndex(headers, "Estado_Ticket") + 1;
+  const colObs = getHeaderIndex(headers, "Observaciones") + 1;
+
+  // Actualizamos el estado
+  hoja.getRange(fila, colEstado).setValue(hito);
+  
+  // Registro de auditoría en la misma fila
+  const logInformativo = "\n[" + Utilities.formatDate(new Date(), "GMT-3", "dd/MM HH:mm") + " - " + rol + "]: " + hito;
+  const obsActual = hoja.getRange(fila, colObs).getValue();
+  hoja.getRange(fila, colObs).setValue(obsActual + logInformativo);
+
+  registrarHistorial("INFRAESTRUCTURA", idTarea, hito, "Actualizado por " + usuario, usuario, "TAREAS");
+
+  return { success: true, message: "Hito de infraestructura actualizado a: " + hito };
+}
+
+/**
+ * ESTA ES LA FUNCIÓN ATÓMICA (La que garantiza que no se pierdan datos)
+ */
+function ejecutarTransaccionInstalacion(d, usuario) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const hojaTareas = obtenerHoja("Tareas");
+  const hojaMaestra = obtenerHoja(d.tipoActivo); // Ej: "CAMARAS"
+
+  if (!hojaMaestra) throw new Error("No existe la hoja maestra: " + d.tipoActivo);
+
+  // 1. Buscamos la fila en Tareas
+  const filaTarea = findRowByColValue(hojaTareas, "ID_Tarea", d.idTarea);
+  if (filaTarea === -1) throw new Error("Tarea no encontrada");
+
+  // --- PASO A: ESCRIBIR EN MAESTRA (SI FALLA AQUÍ, NO PASA AL SIGUIENTE) ---
+  // El orden de las columnas debe coincidir con tu hoja Maestra
+  const nuevaFilaMaestra = [
+    d.idDefinitivo, 
+    d.direccion, 
+    d.ip, 
+    "OPERATIVO", 
+    d.latitud, 
+    d.longitud, 
+    usuario, 
+    new Date()
+  ];
+  hojaMaestra.appendRow(nuevaFilaMaestra);
+
+  // --- PASO B: CERRAR TAREA (SOLO SI EL PASO A FUE EXITOSO) ---
+  const headers = hojaTareas.getRange(1, 1, 1, hojaTareas.getLastColumn()).getValues()[0];
+  const colEstado = getHeaderIndex(headers, "Estado_Ticket") + 1;
+  
+  hojaTareas.getRange(filaTarea, colEstado).setValue("FINALIZADA");
+
+  // 2. Registrar en historial para auditoría
+  registrarHistorial('INSTALACION', d.idDefinitivo, 'ALTA_MAESTRA', d.observaciones, usuario, d.tipoActivo);
+
+  return { success: true, message: "Activo " + d.idDefinitivo + " registrado y tarea cerrada." };
 }
 
 function obtenerDetalleActivo(id, tipo) {
@@ -673,7 +741,8 @@ function instalarDispositivoEnTablero(datos) {
 }
 
 /** Permite al técnico cambiar el estado de una tarea y notificar
- * Resuelve tareas y gestiona la entrega de materiales de laboratorio. */
+ * Resuelve tareas y gestiona la entrega de materiales de laboratorio. 
+ * Solo cambia un estado de PENDIENTE a FINALIZADA*/
 function resolverTarea(idTarea, nuevoEstado) {
   try {
     const usuario = usuarioActivo();
@@ -869,28 +938,6 @@ function procesarDerivacionSecretario(idActivo, etapa) {
   }
 }
 
-/** Cuenta notificaciones pendientes según el perfil que consulta. */
-function actualizarBadgeSolicitudes() {
-  const usuario = usuarioActivo();
-  const rol = OBTENER_ROL_USUARIO(usuario); // Aquí definimos 'rol'
-  let contador = 0;
-
-  if (rol === "SECRETARIO" || rol === "ADMIN") { // Usamos 'rol' directamente
-    const hojaSol = obtenerHoja("Solicitudes");
-    const datos = hojaSol.getDataRange().getValues();
-    // Filtramos filas donde el estado (columna F, índice 5) sea SOLICITADA
-    contador = datos.filter(fila => fila[5] === "SOLICITADA").length;
-  }
-  else if (rol === "TECNICO") { // Usamos 'rol' directamente
-    const hojaTareas = obtenerHoja("Tareas");
-    const datos = hojaTareas.getDataRange().getValues();
-    // Filtramos: Estado (índice 5) PENDIENTE y Perfil (índice 6) TECNICO
-    contador = datos.filter(fila => fila[5] === "PENDIENTE" && fila[6] === "TECNICO").length;
-  }
-
-  return contador;
-}
-
 /**Procesa la autorización de una solicitud (SOL-...) 
  * Cambia el estado en la hoja Solicitudes y crea el ticket de instalación inicial. */
 /** El "Cerebro" de derivaciones del Secretario. */
@@ -928,37 +975,6 @@ function procesarDerivacionSecretario(idActivo, etapa) {
     return { success: true };
   } catch (e) {
     return { success: false, message: e.message };
-  }
-}
-
-/** Cuenta notificaciones pendientes de forma dinámica. */
-function actualizarBadgeSolicitudes() {
-  try {
-    const usuario = usuarioActivo();
-    const rol = OBTENER_ROL_USUARIO(usuario);
-    let contador = 0;
-
-    if (rol === "SECRETARIO" || rol === "ADMIN") {
-      const hojaSol = obtenerHoja("Solicitudes");
-      const datos = hojaSol.getDataRange().getValues();
-      const idxEstado = getHeaderIndex(datos[0], "Estado");
-      // Contamos SOLICITADA
-      contador = datos.filter(fila => (fila[idxEstado] || "").toString().toUpperCase() === "SOLICITADA").length;
-    } 
-    else if (rol === "TECNICO") {
-      const hojaTareas = obtenerHoja("Tareas");
-      const datos = hojaTareas.getDataRange().getValues();
-      const idxEstado = getHeaderIndex(datos[0], "Estado_Ticket");
-      const idxPerfil = getHeaderIndex(datos[0], "Perfil_Asignado");
-      
-      contador = datos.filter(fila => 
-        (fila[idxEstado] || "").toString().toUpperCase() === "PENDIENTE" && 
-        (fila[idxPerfil] || "").toString().toUpperCase() === "TECNICO"
-      ).length;
-    }
-    return contador;
-  } catch (e) {
-    return 0;
   }
 }
 

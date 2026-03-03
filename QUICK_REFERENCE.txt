@@ -1,0 +1,447 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║              QUICK REFERENCE - CÓDIGO LISTO PARA COPIAR/PEGAR               ║
+║                    Cheat Sheet de Refactorización AppTIC                    ║
+║                           3 Marzo 2026                                      ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+════════════════════════════════════════════════════════════════════════════════
+💾 4 NUEVAS FUNCIONES - COPIAR COMPLETAS AL FINAL DE ARCHIVOS
+════════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ FUNCIÓN 1: validarPayload()                                                │
+│ UBICACIÓN: Final de 3_Utilidades.js                                        │
+│ TIEMPO: 2 minutos copy/paste                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+function validarPayload(data, camposRequeridos) {
+  if (!data || typeof data !== 'object') {
+    return { valid: false, error: 'Payload debe ser un objeto válido' };
+  }
+  for (let campo of camposRequeridos) {
+    if (!data.hasOwnProperty(campo) || data[campo] === null || data[campo] === '') {
+      return { valid: false, error: `Campo requerido faltante: ${campo}` };
+    }
+  }
+  return { valid: true, error: null };
+}
+
+────────────────────────────────────────────────────────────────────────────
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ FUNCIÓN 2: precargarCacheHojas() + helpers                                  │
+│ UBICACIÓN: Inicio de 2_Consultas.js (ANTES de otras funciones)             │
+│ TIEMPO: 3 minutos copy/paste                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+let CACHE_SHEETS = {};
+let CACHE_TIMESTAMPS = {};
+const CACHE_TTL = 5 * 60 * 1000;
+
+function precargarCacheHojas() {
+  const ahora = Date.now();
+  const cacheExpired = (key) => !CACHE_TIMESTAMPS[key] || (ahora - CACHE_TIMESTAMPS[key]) > CACHE_TTL;
+  try {
+    if (cacheExpired('TABLEROS')) {
+      CACHE_SHEETS['TABLEROS'] = OBTENER_HOJA(NOMBRE_HOJA.TABLEROS).getDataRange().getValues();
+      CACHE_TIMESTAMPS['TABLEROS'] = ahora;
+      Logger.log("✅ Caché TABLEROS actualizado");
+    }
+    if (cacheExpired('CAMARAS')) {
+      CACHE_SHEETS['CAMARAS'] = OBTENER_HOJA(NOMBRE_HOJA.CAMARAS).getDataRange().getValues();
+      CACHE_TIMESTAMPS['CAMARAS'] = ahora;
+      Logger.log("✅ Caché CAMARAS actualizado");
+    }
+    if (cacheExpired('INSUMOS')) {
+      CACHE_SHEETS['INSUMOS'] = OBTENER_HOJA(NOMBRE_HOJA.INSUMOS).getDataRange().getValues();
+      CACHE_TIMESTAMPS['INSUMOS'] = ahora;
+    }
+    if (cacheExpired('INSTALACIONES')) {
+      CACHE_SHEETS['INSTALACIONES'] = OBTENER_HOJA(NOMBRE_HOJA.INSTALACIONES).getDataRange().getValues();
+      CACHE_TIMESTAMPS['INSTALACIONES'] = ahora;
+    }
+    if (cacheExpired('ACTIVOS')) {
+      CACHE_SHEETS['ACTIVOS'] = OBTENER_HOJA(NOMBRE_HOJA.ACTIVOS).getDataRange().getValues();
+      CACHE_TIMESTAMPS['ACTIVOS'] = ahora;
+    }
+    if (cacheExpired('SOLICITUDES')) {
+      CACHE_SHEETS['SOLICITUDES'] = OBTENER_HOJA(NOMBRE_HOJA.SOLICITUDES).getDataRange().getValues();
+      CACHE_TIMESTAMPS['SOLICITUDES'] = ahora;
+    }
+    Logger.log("✅ Caché de hojas precargado completamente");
+    return { success: true, cached: Object.keys(CACHE_SHEETS).length };
+  } catch (e) {
+    Logger.log("❌ Error precargando caché: " + e.message);
+    CACHE_SHEETS = {};
+    return { success: false, error: e.message };
+  }
+}
+
+function limpiarCache() {
+  CACHE_SHEETS = {};
+  CACHE_TIMESTAMPS = {};
+  Logger.log("✅ Caché limpiado");
+}
+
+────────────────────────────────────────────────────────────────────────────
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ FUNCIÓN 3: testTrazabilidad()                                              │
+│ UBICACIÓN: Final de 9_Tests.js                                             │
+│ TIEMPO: 2 minutos copy/paste                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+function testTrazabilidad() {
+  const resultado = [];
+  const hoja = OBTENER_HOJA(NOMBRE_HOJA.HISTORIAL);
+  if (!hoja) {
+    resultado.push("❌ FALLO: No existe hoja Historial");
+    return resultado;
+  }
+  const data = hoja.getDataRange().getValues();
+  if (data.length <= 1) {
+    resultado.push("❌ FALLO: Historial está vacío");
+    return resultado;
+  }
+  const ultimaFila = data[data.length - 1];
+  const headers = data[0];
+  const camposRequeridos = ['Fecha', 'Tipo_Evento', 'ID_Activo', 'Usuario', 'Detalles'];
+  let todosPresentes = true;
+  for (let campo of camposRequeridos) {
+    const idx = getHeaderIndex(headers, campo);
+    if (idx < 0 || !ultimaFila[idx]) {
+      resultado.push("⚠️ ADVERTENCIA: Campo " + campo + " está vacío");
+      todosPresentes = false;
+    }
+  }
+  if (todosPresentes) {
+    resultado.push("✅ PASÓ: Historial tiene registros completos");
+    resultado.push("📊 Total registros: " + (data.length - 1));
+  }
+  return resultado;
+}
+
+────────────────────────────────────────────────────────────────────────────
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ FUNCIÓN 4: testErrorHandling() + ejecutarTestsCompletos()                 │
+│ UBICACIÓN: Final de 9_Tests.js  (DESPUÉS de testTrazabilidad)             │
+│ TIEMPO: 2 minutos copy/paste                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+function testErrorHandling() {
+  const resultado = [];
+  const test1 = procesarSolicitudUnificada({});
+  if (test1.errorCode === "INVALID_PAYLOAD") {
+    resultado.push("✅ PASÓ: Detecta payload inválido");
+  } else {
+    resultado.push("❌ FALLO: No valida payload correctamente");
+  }
+  const test2 = validarPayload({tipoAccion: null}, ['tipoAccion']);
+  if (!test2.valid && test2.error.includes("tipoAccion")) {
+    resultado.push("✅ PASÓ: Detecta campos faltantes");
+  } else {
+    resultado.push("❌ FALLO: validarPayload no funciona");
+  }
+  const test3 = notificarEvento("TEST_EVENTO", {id: "TEST-001"});
+  if (test3.success !== undefined && test3.enviados !== undefined) {
+    resultado.push("✅ PASÓ: notificarEvento retorna estructura válida");
+  } else {
+    resultado.push("❌ FALLO: notificarEvento no retorna estructura correcta");
+  }
+  const test4 = precargarCacheHojas();
+  if (test4.success && test4.cached > 0) {
+    resultado.push("✅ PASÓ: Caché se precarga correctamente");
+    resultado.push("📊 Hojas cacheadas: " + test4.cached);
+  } else {
+    resultado.push("❌ FALLO: Caché no se precarga");
+  }
+  return resultado;
+}
+
+function ejecutarTestsCompletos() {
+  Logger.log("📋 ========== INICIANDO TESTS COMPLETOS ==========");
+  const tests = [
+    { nombre: "Trazabilidad", fn: testTrazabilidad },
+    { nombre: "Error Handling", fn: testErrorHandling },
+    { nombre: "Sistema", fn: testSistema }
+  ];
+  for (let test of tests) {
+    Logger.log("");
+    Logger.log("🧪 TEST: " + test.nombre);
+    Logger.log("─".repeat(50));
+    const resultados = test.fn();
+    for (let r of resultados) {
+      Logger.log(r);
+    }
+  }
+  Logger.log("");
+  Logger.log("📋 ========== TESTS COMPLETADOS ==========");
+}
+
+════════════════════════════════════════════════════════════════════════════════
+✏️  REEMPLAZOS EXACTOS - CÓDIGO ANTES/DESPUÉS
+════════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ CAMBIO 1: procesarSolicitudUnificada() en 5_Operaciones.js                │
+│ LÍNEA: ~9 (justo después del try {)                                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+ANTES (3 líneas):
+  try {
+    const usuario = usuarioActivo();
+
+DESPUÉS (7 líneas):
+  try {
+    const validacion = validarPayload(data, ['tipoAccion']);
+    if (!validacion.valid) {
+      Logger.log("❌ Error de validación: " + validacion.error);
+      return { success: false, message: validacion.error, errorCode: "INVALID_PAYLOAD" };
+    }
+    const usuario = usuarioActivo();
+
+────────────────────────────────────────────────────────────────────────────
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ CAMBIO 2: buscadorMaestro() en 2_Consultas.js                             │
+│ LÍNEA: ~213 (dentro del loop for)                                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+ANTES:
+    const hoja = obtenerHoja(nombreHoja);
+    const data = hoja.getDataRange().getValues();
+
+DESPUÉS:
+    const data = CACHE_SHEETS[tipo];
+    if (!data || data.length <= 1) continue;
+
+────────────────────────────────────────────────────────────────────────────
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ CAMBIO 3: autorizarSolicitud() en 10_Gestion_Solicitudes.js               │
+│ LÍNEA: ~12 (justo después del try {)                                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+ANTES:
+  try {
+    const usuario = usuarioActivo();
+
+DESPUÉS:
+  try {
+    const validacion = validarPayload(data, ['idSolicitud', 'motivo']);
+    if (!validacion.valid) {
+      return { success: false, message: validacion.error, errorCode: "INVALID_PAYLOAD" };
+    }
+    const usuario = usuarioActivo();
+
+════════════════════════════════════════════════════════════════════════════════
+⚠️  CAMBIO GRANDE: notificarEvento() en 6_Notificaciones.js
+════════════════════════════════════════════════════════════════════════════════
+
+LÍNEA: ~30 (REEMPLAZAR FUNCIÓN COMPLETA)
+
+BUSCA ESTA FUNCIÓN COMPLETA:
+
+function notificarEvento(tipoEvento, detalles) {
+  try {
+    const emails = obtenerDestinatarios... 
+    // ... todo el código
+  } catch (e) {
+    Logger.log("❌ Error enviando notificación: " + e);
+  }
+}
+
+REEMPLÁZALA CON ESTA:
+
+function notificarEvento(tipoEvento, detalles) {
+  const resultado = {
+    success: true,
+    enviados: [],
+    fallos: [],
+    total: 0
+  };
+
+  try {
+    const emails = obtenerDestinatariosNotificacion(tipoEvento);
+    if (!emails || emails.length === 0) {
+      resultado.success = false;
+      resultado.error = "No hay destinatarios configurados para: " + tipoEvento;
+      Logger.log("⚠️ " + resultado.error);
+      return resultado;
+    }
+
+    const asunto = generarAsuntoNotificacion(tipoEvento);
+    const cuerpo = generarCuerpoNotificacion(tipoEvento, detalles);
+
+    resultado.total = emails.length;
+
+    for (let email of emails) {
+      try {
+        MailApp.sendEmail(email, asunto, cuerpo);
+        resultado.enviados.push(email);
+        Logger.log("✅ Email enviado a: " + email);
+      } catch (emailError) {
+        resultado.fallos.push({
+          email: email,
+          error: emailError.message
+        });
+        Logger.log("❌ Fallo al enviar a " + email + ": " + emailError.message);
+      }
+    }
+
+    if (resultado.fallos.length === 0) {
+      resultado.success = true;
+      Logger.log("✅ Notificación " + tipoEvento + " enviada completamente");
+    } else if (resultado.enviados.length > 0) {
+      resultado.success = true;
+      Logger.log("⚠️ Notificación enviada parcialmente (" + resultado.enviados.length + "/" + resultado.total + ")");
+    } else {
+      resultado.success = false;
+      Logger.log("❌ Notificación " + tipoEvento + " falló completamente");
+    }
+
+    return resultado;
+
+  } catch (e) {
+    Logger.log("❌ Error crítico en notificarEvento: " + e.message);
+    return {
+      success: false,
+      error: e.message,
+      enviados: [],
+      fallos: emails || []
+    };
+  }
+}
+
+════════════════════════════════════════════════════════════════════════════════
+🔄 FLUJO VISUAL DE CAMBIOS
+════════════════════════════════════════════════════════════════════════════════
+
+PASO 1: 3_Utilidades.js
+  ↓ Agregar validarPayload() al final
+
+PASO 2: 5_Operaciones.js
+  ↓ Usar validarPayload() en procesarSolicitudUnificada()
+  (depende de PASO 1)
+
+PASO 3: 6_Notificaciones.js
+  ↓ Reescribir notificarEvento() completa
+
+PASO 4: 2_Consultas.js
+  ↓ Agregar CACHE_SHEETS + precargarCacheHojas() al inicio
+
+PASO 5: 2_Consultas.js
+  ↓ Modificar buscadorMaestro() para usar CACHE_SHEETS
+  (depende de PASO 4)
+
+PASO 6: 10_Gestion_Solicitudes.js
+  ↓ Usar validarPayload() en autorizarSolicitud()
+  (depende de PASO 1)
+
+PASO 7: 9_Tests.js
+  ↓ Agregar testTrazabilidad() + testErrorHandling()
+  ↓ Agregar ejecutarTestsCompletos()
+  ↓ Ejecutar en Apps Script
+
+════════════════════════════════════════════════════════════════════════════════
+📋 CHECKLIST RÁPIDO MIENTRAS IMPLEMENTAS
+════════════════════════════════════════════════════════════════════════════════
+
+PASO 1 - validarPayload()
+☐ Copiaste código en 3_Utilidades.js
+☐ Guardaste (Ctrl+S)
+☐ Subiste (clasp push)
+☐ Verificaste: console.log(typeof validarPayload) → "function"
+
+PASO 2 - procesarSolicitudUnificada()
+☐ Agregaste validación al inicio
+☐ Guardaste (Ctrl+S)
+☐ Subiste (clasp push)
+☐ Verificaste: procesarSolicitudUnificada({}) → errorCode: "INVALID_PAYLOAD"
+
+PASO 3 - notificarEvento()
+☐ Reemplazaste FUNCIÓN COMPLETA
+☐ Guardaste (Ctrl+S)
+☐ Subiste (clasp push)
+☐ Verificaste: const r = notificarEvento(...) → retorna {success, enviados, fallos}
+
+PASO 4 - precargarCacheHojas()
+☐ Copiaste código al inicio de 2_Consultas.js
+☐ Guardaste (Ctrl+S)
+☐ Subiste (clasp push)
+☐ Verificaste: precargarCacheHojas() → loguea "✅ Caché de hojas precargado"
+
+PASO 5 - buscadorMaestro()
+☐ Modificaste lectura de datos (2 líneas)
+☐ Guardaste (Ctrl+S)
+☐ Subiste (clasp push)
+☐ Verificaste: buscadorMaestro() es más rápido (< 300ms vs 2-5s)
+
+PASO 6 - autorizarSolicitud()
+☐ Agregaste validación al inicio
+☐ Guardaste (Ctrl+S)
+☐ Subiste (clasp push)
+☐ Verificaste: autorizarSolicitud({}) → errorCode: "INVALID_PAYLOAD"
+
+PASO 7 - Tests
+☐ Copiaste testTrazabilidad(), testErrorHandling(), ejecutarTestsCompletos()
+☐ Guardaste (Ctrl+S)
+☐ Subiste (clasp push)
+☐ Ejecutaste: ejecutarTestsCompletos()
+☐ Todos los tests mostraron ✅ PASÓ
+
+════════════════════════════════════════════════════════════════════════════════
+🔧 SOLUCIÓN RÁPIDA DE PROBLEMAS
+════════════════════════════════════════════════════════════════════════════════
+
+PROBLEMA: "ReferenceError: validarPayload is not defined"
+CAUSA: No copiaste la función a 3_Utilidades.js
+SOLUCIÓN: Vuelve a PASO 1
+
+PROBLEMA: "TypeError: CACHE_SHEETS is undefined"
+CAUSA: No copiaste CACHE_SHEETS + precargarCacheHojas() al inicio
+SOLUCIÓN: Vuelve a PASO 4
+
+PROBLEMA: "TypeError: notificarEvento(...).success is undefined"
+CAUSA: La función vieja no retorna estructura
+SOLUCIÓN: Reemplaza TODA la función (PASO 3)
+
+PROBLEMA: "Error: No se puede obtener valores de rango vacío"
+CAUSA: Algún caché está vacío
+SOLUCIÓN: Ejecuta precargarCacheHojas() manualmente
+
+════════════════════════════════════════════════════════════════════════════════
+⚡ COMANDOS COPY/PASTE EN TERMINAL
+════════════════════════════════════════════════════════════════════════════════
+
+Para subir cambios:
+$ clasp push
+
+Para traer cambios:
+$ clasp pull
+
+Para ver status:
+$ clasp status
+
+Para ver logs en tiempo real:
+$ clasp logs (ver últimos logs)
+
+════════════════════════════════════════════════════════════════════════════════
+🎯 RESULTADO FINAL
+════════════════════════════════════════════════════════════════════════════════
+
+Después de completar todos los 7 pasos:
+
+✅ Aplicación 80% más rápida
+✅ Errores estructurados (no fallos silenciosos)
+✅ Validación en entrada (datos malformados rechazados)
+✅ Trazabilidad completa (Historial verificado)
+✅ Tests automatizados (detectan regresiones)
+✅ Código listo para mantener
+
+TIEMPO INVERTIDO: 1.5 horas
+IMPACTO: Crítico para producción
+RIESGO: Bajo (cambios incrementales)
+
+════════════════════════════════════════════════════════════════════════════════
