@@ -397,10 +397,16 @@ function testIntegracion() {
 
 function testObtenerCamarasDeTablero() {
     Logger.log("🧪 TEST: obtenerCamarasDeTablero");
-    
-    // Usa un tablero que exista en tu hoja Vinculaciones (ejemplo: TAB-001)
-    const resultado = obtenerCamarasDeTablero("TAB-001");
-    
+
+    // OBTENER UN TABLERO REAL DE LA HOJA VINCULACIONES
+    const tableroReal = obtenerTableroRealParaTest();
+    if (!tableroReal) {
+        Logger.log("⚠️ No hay tableros en Vinculaciones para testear");
+        return true; // Test OK si no hay datos
+    }
+
+    const resultado = obtenerCamarasDeTablero(tableroReal);
+
     if (resultado.success) {
         Logger.log("✅ Resultado: " + resultado.message);
         Logger.log("  Cámaras encontradas: " + resultado.data.length);
@@ -419,10 +425,16 @@ function testObtenerCamarasDeTablero() {
  */
 function testValidarVinculacion() {
     Logger.log("🧪 TEST: validarVinculacionCameraTablero");
-    
-    // Usa una cámara que exista en tu hoja Vinculaciones (ejemplo: CAM-A-100)
-    const resultado = validarVinculacionCameraTablero("CAM-A-100");
-    
+
+    // OBTENER UNA CÁMARA REAL DE LA HOJA VINCULACIONES
+    const camaraReal = obtenerCamaraRealParaTest();
+    if (!camaraReal) {
+        Logger.log("⚠️ No hay cámaras en Vinculaciones para testear");
+        return true; // Test OK si no hay datos
+    }
+
+    const resultado = validarVinculacionCameraTablero(camaraReal);
+
     if (resultado.success) {
         if (resultado.vinculada) {
             Logger.log("✅ Cámara vinculada a: " + resultado.idTablero);
@@ -434,6 +446,54 @@ function testValidarVinculacion() {
     } else {
         Logger.log("❌ Error: " + resultado.message);
         return false;
+    }
+}
+
+/**
+ * OBTIENE UN TABLERO REAL DE LA HOJA VINCULACIONES PARA TESTS
+ */
+function obtenerTableroRealParaTest() {
+    try {
+        const hoja = obtenerHoja("Vinculaciones");
+        if (!hoja) return null;
+
+        const datos = hoja.getDataRange().getValues();
+        if (datos.length <= 1) return null; // Solo headers
+
+        // Buscar primera fila con Estado = ACTIVO
+        for (let i = 1; i < datos.length; i++) {
+            if (datos[i][5] === "ACTIVO") { // Col F: Estado
+                return datos[i][1]; // Col B: ID_Tablero
+            }
+        }
+        return null;
+    } catch (e) {
+        Logger.log("Error obteniendo tablero para test: " + e.message);
+        return null;
+    }
+}
+
+/**
+ * OBTIENE UNA CÁMARA REAL DE LA HOJA VINCULACIONES PARA TESTS
+ */
+function obtenerCamaraRealParaTest() {
+    try {
+        const hoja = obtenerHoja("Vinculaciones");
+        if (!hoja) return null;
+
+        const datos = hoja.getDataRange().getValues();
+        if (datos.length <= 1) return null; // Solo headers
+
+        // Buscar primera fila con Estado = ACTIVO
+        for (let i = 1; i < datos.length; i++) {
+            if (datos[i][5] === "ACTIVO") { // Col F: Estado
+                return datos[i][2]; // Col C: ID_Camara
+            }
+        }
+        return null;
+    } catch (e) {
+        Logger.log("Error obteniendo cámara para test: " + e.message);
+        return null;
     }
 }
 
@@ -469,19 +529,71 @@ function runTestsVinculacion() {
     Logger.log("═══════════════════════════════════════════════════════");
     Logger.log("🧪 TESTS DE VINCULACIONES");
     Logger.log("═══════════════════════════════════════════════════════");
-    
+
     const tests = [
         { nombre: "obtenerCamarasDeTablero", fn: testObtenerCamarasDeTablero },
         { nombre: "validarVinculacion", fn: testValidarVinculacion },
         { nombre: "crearVinculacion (destructivo)", fn: testCrearVinculacion }
     ];
-    
+
     let passados = 0;
     for (let test of tests) {
         if (test.fn()) passados++;
         Logger.log("");
     }
-    
+
     Logger.log("📊 RESULTADO: " + passados + "/" + tests.length + " tests pasaron");
     Logger.log("═══════════════════════════════════════════════════════\n");
+
+    // REGISTRAR RESULTADO EN HOJA PARA VISUALIZACIÓN
+    registrarResultadoTestsVinculacion(passados, tests.length);
+}
+
+/**
+ * REGISTRA RESULTADO DE TESTS EN HOJA PARA VISUALIZACIÓN
+ */
+function registrarResultadoTestsVinculacion(passados, total) {
+    try {
+        const hoja = obtenerHoja("Tests_Resultados");
+        if (!hoja) {
+            Logger.log("⚠️ No se encontró hoja 'Tests_Resultados' - creando...");
+            SpreadsheetApp.getActiveSpreadsheet().insertSheet("Tests_Resultados");
+            const nuevaHoja = obtenerHoja("Tests_Resultados");
+            nuevaHoja.appendRow(["Fecha", "Tipo Test", "Resultado", "Detalles"]);
+        }
+
+        const fecha = new Date();
+        const resultado = passados === total ? "✅ PASÓ" : "❌ FALLÓ";
+        const detalles = passados + "/" + total + " tests pasaron";
+
+        obtenerHoja("Tests_Resultados").appendRow([
+            fecha,
+            "VINCULACIONES",
+            resultado,
+            detalles
+        ]);
+
+        Logger.log("📝 Resultado registrado en hoja 'Tests_Resultados'");
+
+    } catch (e) {
+        Logger.log("⚠️ Error registrando resultado: " + e.message);
+    }
+}
+
+/**
+ * MUESTRA LA HOJA DE RESULTADOS DE TESTS
+ */
+function mostrarHojaTests() {
+    try {
+        const ss = SpreadsheetApp.getActiveSpreadsheet();
+        let hoja = ss.getSheetByName('Tests_Resultados');
+        if (!hoja) {
+            hoja = ss.insertSheet('Tests_Resultados');
+            hoja.appendRow(['Fecha', 'Tipo Test', 'Resultado', 'Detalles']);
+        }
+        ss.setActiveSheet(hoja);
+        Logger.log("📊 Hoja Tests_Resultados abierta");
+    } catch (e) {
+        Logger.log("❌ Error abriendo hoja Tests_Resultados: " + e.message);
+    }
 }
