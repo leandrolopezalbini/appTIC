@@ -1,0 +1,232 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║         ARQUITECTURA DE VINCULACIONES - RESUMEN EJECUTIVO                      ║
+║         PASO 3 y 4: TESTS + INTEGRACIÓN EN FLUJOS                             ║
+║         Fecha: 04/03/2026                                                     ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════════════════
+PASO 1: CREACIÓN DE HOJA VINCULACIONES ✅ (COMPLETADO)
+═══════════════════════════════════════════════════════════════════════════════
+
+Hoja: "Vinculaciones"
+Encabezados: A) ID_Vinculacion | B) ID_Tablero | C) ID_Camara | D) ID_Switch | E) Fecha_Vinculo | F) Estado
+
+Ejemplos de datos:
+- VIN-001 | TAB-001 | CAM-A-100 | SW-100-01 | 2026-03-01 | ACTIVA
+- VIN-002 | TAB-001 | CAM-A-101 | SW-100-01 | 2026-03-01 | ACTIVA
+- VIN-003 | TAB-001 | CAM-A-102 | SW-100-02 | 2026-03-02 | ACTIVA
+
+═══════════════════════════════════════════════════════════════════════════════
+PASO 2: FUNCIONES DE VINCULACIÓN - MEJORADAS ✅ (COMPLETADO)
+═══════════════════════════════════════════════════════════════════════════════
+
+Ubicación: 5_Operaciones.js líneas ~963-1070
+
+FUNCIÓN 1: obtenerCamarasDeTablero(idTablero)
+──────────────────────────────────────────────
+Propósito: El INSTALADOR ve todas las cámaras instaladas en un tablero
+Entrada: ID del tablero (ej: "TAB-001")
+Retorna: {success: true, data: [{idCamara, idSwitch}, ...], message: "..."}
+Ejemplo: obtenerCamarasDeTablero("TAB-001")
+         → [{idCamara: "CAM-A-100", idSwitch: "SW-100-01"}, ...]
+
+FUNCIÓN 2: validarVinculacionCameraTablero(idCamara, idTablero?)
+────────────────────────────────────────────────────────────────
+Propósito: El TÉCNICO valida que una cámara está vinculada a un tablero
+Entrada: ID cámara, ID tablero (opcional)
+Retorna: {success: true, vinculada: true, idTablero: "TAB-001"}
+Ejemplo: validarVinculacionCameraTablero("CAM-A-100")
+         → {success: true, vinculada: true, idTablero: "TAB-001"}
+
+FUNCIÓN 3: crearVinculacionCameraTablero(idCamara, idTablero, idSwitch)
+────────────────────────────────────────────────────────────────────────
+Propósito: El INSTALADOR registra una cámara nueva en un tablero
+Entrada: ID cámara existente, ID tablero existente, ID switch (opcional)
+Retorna: {success: true, idVinculacion: "VIN-001", message: "..."}
+Validaciones: Verifica que ambos activos existan y que no esté ya vinculada
+Ejemplo: crearVinculacionCameraTablero("CAM-B-050", "TAB-002", "SW-200-01")
+         → {success: true, idVinculacion: "VIN-004"}
+
+═══════════════════════════════════════════════════════════════════════════════
+PASO 3: TESTS UNITARIOS ✅ (CREADO EN TEST_VINCULACIONES.gs)
+═══════════════════════════════════════════════════════════════════════════════
+
+Archivo: TEST_VINCULACIONES.gs
+Contiene 4 funciones:
+
+TEST 1: testObtenerCamarasDeTablero()
+─────────────────────────────────────
+Ejecuta: obtenerCamarasDeTablero("TAB-001")
+Valida: Que devuelva array de cámaras vinculadas
+Status: ✅ PASARÁ si tienes datos en Vinculaciones
+
+TEST 2: testValidarVinculacion()
+──────────────────────────────
+Ejecuta: validarVinculacionCameraTablero("CAM-A-100")
+Valida: Que devuelva {vinculada: true, idTablero: "TAB-001"}
+Status: ✅ PASARÁ si la cámara está en tu hoja
+
+TEST 3: testCrearVinculacion()
+──────────────────────────────
+Ejecuta: crearVinculacionCameraTablero("CAM-TEST-999", "TAB-TEST-888", ...)
+Valida: Que falle correctamente por IDs no existentes
+Status: ⚠️ ESPERADO FALLAR (esto valida que hay validación)
+
+TEST RUNNER: runTestsVinculacion()
+──────────────────────────────────
+Ejecuta: Todos los 3 tests en secuencia
+Output: "RESULTADO: 3/3 tests pasaron"
+Cómo usar:
+  1. Abre Apps Script Editor
+  2. Ctrl+A → Ctrl+C (copia TEST_VINCULACIONES.gs)
+  3. En Apps Script nuevo script o tab
+  4. Ctrl+V para pegar
+  5. Ejecuta: runTestsVinculacion()
+
+═══════════════════════════════════════════════════════════════════════════════
+PASO 4: INTEGRACIÓN EN FLUJOS ✅ (INSTRUCCIONES EN INTEGRACION_VINCULACIONES.gs)
+═══════════════════════════════════════════════════════════════════════════════
+
+INTEGRACIÓN 1: En finalizarInstalacionYCrearActivo()
+──────────────────────────────────────────────────────
+Dónde: DESPUÉS de actualizar MAPS (paso 5), ANTES de cerrar ticket (paso 6)
+Línea: Aprox 793 (después de hojaMaps.appendRow)
+
+Código a agregar:
+┌────────────────────────────────────────────────────────────────────┐
+│ if (tipoActivo.toUpperCase() === 'CAMARAS' && datosFinales.idTablero) { │
+│   const vincResult = crearVinculacionCameraTablero(                │
+│     idDefinitivo,                                                 │
+│     datosFinales.idTablero,                                       │
+│     datosFinales.idSwitch || ''                                   │
+│   );                                                               │
+│   if (vincResult.success) {                                        │
+│     Logger.log('✅ Vinculación creada automáticamente');          │
+│   }                                                                │
+│ }                                                                  │
+└────────────────────────────────────────────────────────────────────┘
+
+FLUJO RESULTANTE:
+1. INSTALADOR completa formulario de alta de cámara
+2. Incluye: ID cámara, ID tablero, ID switch
+3. Llama: finalizarInstalacionYCrearActivo(datos)
+4. Sistema:
+   - Crea fila en Camaras
+   - Crea fila en Vinculaciones (NUEVO)
+   - Registra historial con ambas acciones
+   - Cierra ticket del instalador
+
+INTEGRACIÓN 2: En manejadorActualizacion() 
+──────────────────────────────────────────
+Dónde: ANTES del switch statement (validación de entrada)
+Línea: Aprox línea 55 (después de validar rol)
+
+Código a agregar:
+┌────────────────────────────────────────────────────────────────────┐
+│ if (data.tipoAccion === 'REPORTE_COM' && data.id) {               │
+│   const valVinc = validarVinculacionCameraTablero(data.id);       │
+│   if (!valVinc.success || !valVinc.vinculada) {                   │
+│     throw new Error('Cámara ' + data.id +                         │
+│       ' no está vinculada a ningún tablero');                     │
+│   }                                                                 │
+│ }                                                                  │
+└────────────────────────────────────────────────────────────────────┘
+
+FLUJO RESULTANTE:
+1. COM reporta falla en CAM-A-100 vía formulario
+2. Sistema valida:
+   - ¿Existe la cámara?
+   - ¿Está vinculada a un tablero activo?
+3. Si NO está vinculada → Error: "No vinculada"
+4. Si SÍ está vinculada:
+   - Obtiene idTablero: "TAB-001"
+   - Crea tarea para TÉCNICO asignado a esa zona
+   - TÉCNICO ve en panel: "CAM-A-100 está en TAB-001"
+   - TÉCNICO puede:
+     a) Revisar la cámara (software/óptica)
+     b) Si falla, revisar SWITCH del tablero (obtenerCamarasDeTablero)
+     c) Informar si es problema de infraestructura
+
+═══════════════════════════════════════════════════════════════════════════════
+FLUJO COMPLETO: REPORTE DE FALLA -> RESOLUCIÓN
+═══════════════════════════════════════════════════════════════════════════════
+
+Escenario: Espacios Verdes reporta falla en CAM-A-100 (¿) debido a poda
+
+Timeline:
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+
+|14:00| COM (Espacios Verdes) abre Panel.html
+      └─ Busca: "falla en CAM-A-100"
+      └─ Llena formulario: tipoFalla=PODA, id=CAM-A-100
+
+|14:02| Frontend llama: procesarSolicitudUnificada({
+         id: 'CAM-A-100',
+         tipoAccion: 'REPORTE_COM',
+         tipoFalla: 'PODA',
+         observaciones: 'Ramas tapiando la vista'
+       })
+
+|14:03| Backend (manejadorActualizacion):
+      ├─ VALIDAR: ¿CAM-A-100 está vinculada? → SÍ, a TAB-001
+      ├─ OBTENER: Cámaras de TAB-001 → [CAM-A-100, CAM-A-101, CAM-A-102]
+      ├─ CREAR TAREA: Para TÉCNICO de zona
+      ├─ REGISTRAR HISTORIAL: REPORTE_COM iniciado
+      └─ NOTIFICAR: TÉCNICO recibe aviso + datos de tablero
+
+|14:15| TÉCNICO abre Panel.html
+      └─ Ve "Tarea pendiente: CAM-A-100 en TAB-001"
+      └─ Click → Abre ficha de cámara
+      └─ Datos: IP, Switch, Estado, Historial
+      └─ Ve que está en tablero TAB-001
+      └─ Decide: "Voy a revisar el switch también por si acaso"
+
+|14:30| TÉCNICO accede a la zona
+      └─ Revisa CAM-A-100 → Estado: OK
+      └─ Revisa SWITCH: SW-100-01 → Activo
+      └─ Problema: Ramas de árbol cubriendo lente
+      └─ Acción: Corta ramas (coordina con Espacios Verdes)
+      └─ Marca tarea: RESUELTA
+
+|15:00| INSTALADOR hace mantenimiento anual del tablero TAB-001
+      └─ Obtiene: obtenerCamarasDeTablero("TAB-001")
+      └─ Ve: [CAM-A-100, CAM-A-101, CAM-A-102] todas activas
+      └─ Reinicia SW-100-01 por mantenimiento
+      └─ Valida vinculaciones post-reinicio
+      └─ Registra: Mantenimiento de 3 cámaras + 1 switch
+
+═════════════════════════════════════════════════════════════════════════════
+
+BENEFICIOS DE ESTA ARQUITECTURA:
+
+1. ✅ TRAZABILIDAD: Cada cámara tiene historial de dónde está y cuándo se vinculó
+2. ✅ PERMISOS: TÉCNICO solo ve cámaras que le pueden reportar problemas
+3. ✅ IMPACTO: INSTALADOR sabe qué se afecta al tocar un switch
+4. ✅ EFICIENCIA: COM reporta → Sistema sabe a quién notificar automáticamente
+5. ✅ ESCALABILIDAD: Funciona con 10 ó 1000 cámaras
+
+═════════════════════════════════════════════════════════════════════════════
+
+RESUMEN DE ARCHIVOS:
+
+Creados/Modificados:
+├─ 5_Operaciones.js (mejoradas 3 funciones de vinculación)
+├─ TEST_VINCULACIONES.gs (tests unitarios)
+├─ INTEGRACION_VINCULACIONES.gs (instrucciones de integración)
+└─ Panel.html (ya tiene cargarCamarasDeTablero() en línea 1107)
+
+═════════════════════════════════════════════════════════════════════════════
+
+PRÓXIMOS PASOS:
+
+[ ] 1. Revisar datos en hoja Vinculaciones (validar IDs)
+[ ] 2. Ejecutar: runTestsVinculacion()
+[ ] 3. Si fallan tests: revisar que CAM y TAB existan en hojas maestras
+[ ] 4. Copiar código de INTEGRACION_VINCULACIONES.gs a 5_Operaciones.js
+[ ] 5. Ejecutar: runTests() + testPerformance()
+[ ] 6. Hacer clasp push
+[ ] 7. Probar flujo completo en staging
+
+═════════════════════════════════════════════════════════════════════════════
+Fin del documento.
+═════════════════════════════════════════════════════════════════════════════

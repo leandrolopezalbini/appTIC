@@ -26,39 +26,72 @@ function enviarMailCambioEstado(idTablero, estado, detalle, usuarioEmail) {
     } catch(e) { Logger.log("Error enviando mail: " + e); }
 }
 
-/** Distribuye notificaciones por Mail o Sistema a perfiles específicos. */
-function notificarEvento(evento, detalles) {
-  const perfilesANotificar = [];
+/**
+ * Notifica a destinatarios por email
+ * @param {string} tipoEvento - Tipo de evento (ej: "SOLICITUD_APROBADA")
+ * @param {Object} detalles - Detalles adicionales del evento
+ * @return {Object} {success: true/false, enviados: [], fallos: []}
+ */
+function notificarEvento(tipoEvento, detalles) {
+  const resultado = {
+    success: true,
+    enviados: [],     // Emails que se mandaron OK
+    fallos: [],       // Emails que fallaron + error
+    total: 0
+  };
 
-  switch(evento) {
-    case 'NUEVA_SOLICITUD_COM':
-      perfilesANotificar.push('SECRETARIO', 'ADMIN');
-      break;
-    case 'AUTORIZACION_TABLERO': // Secretario autoriza un tablero nuevo
-      perfilesANotificar.push('SERVICIOS_PUBLICOS', 'ADMIN');
-      break;
-    case 'SOLICITUD_ENERGIA': // Se requiere que Eden de luz
-      perfilesANotificar.push('EDEN', 'SECRETARIO');
-      break;
-    case 'SOLICITUD_CONECTIVIDAD': // Se requiere a IPNEXT o Instaladores
-      perfilesANotificar.push('IPNEXT', 'INSTALADOR', 'TECNICO');
-      break;
-    case 'SOLICITUD_PODA':
-      perfilesANotificar.push('ESPACIOS_VERDES', 'SECRETARIO');
-      break;
-    case 'ALTA_DEFINITIVA': // El instalador terminó todo
-      perfilesANotificar.push('TECNICO', 'SECRETARIO', 'COM', 'ADMIN');
-      break;
-  }
+  try {
+    // Obtiene lista de emails destinatarios
+    const emails = obtenerDestinatariosNotificacion(tipoEvento);
+    
+    if (!emails || emails.length === 0) {
+      resultado.success = false;
+      resultado.error = "No hay destinatarios configurados para: " + tipoEvento;
+      Logger.log("⚠️ " + resultado.error);
+      return resultado;
+    }
 
-  const emails = buscarEmailsPorPerfiles(perfilesANotificar);
-  
-  if (emails.length > 0) {
-    MailApp.sendEmail({
-      to: emails.join(","),
-      subject: `SISTEMA SEGURIDAD: ${evento} - Activo: ${detalles.id}`,
-      body: `Detalles: ${detalles.msg}\n\nUbicación: ${detalles.ubicacion || 'Ver en Mapa'}\nUsuario responsable: ${detalles.usuario}`
-    });
+    const asunto = generarAsuntoNotificacion(tipoEvento);
+    const cuerpo = generarCuerpoNotificacion(tipoEvento, detalles);
+    resultado.total = emails.length;
+
+    // Intenta mandar a cada email por separado para capturar fallos
+    for (let email of emails) {
+      try {
+        MailApp.sendEmail(email, asunto, cuerpo);
+        resultado.enviados.push(email);
+        Logger.log("✅ Email enviado a: " + email);
+      } catch (emailError) {
+        resultado.fallos.push({
+          email: email,
+          error: emailError.message
+        });
+        Logger.log("❌ Fallo al enviar a " + email + ": " + emailError.message);
+      }
+    }
+
+    // Determina si fue exitoso general
+    if (resultado.fallos.length === 0) {
+      resultado.success = true;
+      Logger.log("✅ Notificación " + tipoEvento + " enviada completamente");
+    } else if (resultado.enviados.length > 0) {
+      resultado.success = true; // Exitoso parcial
+      Logger.log("⚠️ Notificación enviada parcialmente");
+    } else {
+      resultado.success = false;
+      Logger.log("❌ Notificación falló completamente");
+    }
+
+    return resultado;
+
+  } catch (e) {
+    Logger.log("❌ Error crítico en notificarEvento: " + e.message);
+    return {
+      success: false,
+      error: e.message,
+      enviados: [],
+      fallos: emails || []
+    };
   }
 }
 

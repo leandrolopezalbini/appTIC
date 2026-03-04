@@ -42,7 +42,6 @@ const ESTADO = {
     CREACION: "CREACION"
 };
 
-
 const PERFILES = {
     OPERADOR: 'OPERADOR',
     SOPORTE: 'SOPORTE',
@@ -83,3 +82,37 @@ const MAILS_ESTADO = {
     "CONECTADA": ["pollolopeza@gmail.com"]
 };
 
+/**
+ * SESIÓN CACHÉ: Usa PropertiesService para almacenar datos por usuario
+ * Útil si el proyecto crece (usuarios simultáneos > 5)
+ */
+const SESION_CACHE = {
+  set: function(clave, valor, minutosExpiracion = 60) {
+    const props = PropertiesService.getUserProperties();
+    props.setProperty(clave, JSON.stringify({
+      valor: valor,
+      expira: new Date().getTime() + (minutosExpiracion * 60 * 1000)
+    }));
+  },
+
+  get: function(clave) {
+    const props = PropertiesService.getUserProperties();
+    const item = props.getProperty(clave);
+    if (!item) return null;
+
+    const obj = JSON.parse(item);
+    if (new Date().getTime() > obj.expira) {
+      props.deleteProperty(clave);
+      return null;
+    }
+    return obj.valor;
+  },
+
+  clear: function(clave) {
+    PropertiesService.getUserProperties().deleteProperty(clave);
+  },
+
+  clearAll: function() {
+    PropertiesService.getUserProperties().deleteAllProperties();
+  }
+};

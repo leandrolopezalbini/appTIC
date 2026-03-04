@@ -1,0 +1,112 @@
+╔═════════════════════════════════════════════════════════════════╗
+║           AUDITORÍA DE CÓDIGO SEMESTRAL - APPTTIC               ║
+║                    (Cada 6 meses)                               ║
+║                    Próxima: 04/09/2026                          ║
+╚═════════════════════════════════════════════════════════════════╝
+
+RESPONSABLE ACTUAL: Desarrollo
+ÚLTIMA AUDITORÍA: 04/03/2026
+PRÓXIMA PROGRAMADA: 04/09/2026
+
+═══════════════════════════════════════════════════════════════════
+
+CHECKLIST DE REVISIÓN:
+
+[ ] 1. SEGURIDAD
+  [ ] Verificar que RBAC siga siendo efectivo
+  [ ] Revisar permisos en cada rol:
+      [ ] ADMIN - Full access
+      [ ] SECRETARIO - Gestión + Reportes
+      [ ] TECNICO - Instalación + Reportes
+      [ ] COM - Solicitudes + Tareas
+      [ ] LECTURA - Solo informes
+  [ ] Comprobar que no hay accesos a datos sensibles sin autenticación
+  [ ] Revisar logs para accesos denegados o anómalos
+
+[ ] 2. PERFORMANCE
+  [ ] Ejecutar testPerformance() - debe estar < 500ms
+  [ ] Revisar CACHE_SHEETS - limpiar si ocupa > 50% del límite
+  [ ] Ejecutar buscadorMaestro() y cronometrar
+  [ ] Buscar queries lentas en Logs
+  [ ] Verificar que onEdit() invalida caché correctamente
+  [ ] Revisar tiempo de carga de reportes
+
+[ ] 3. VALIDACIÓN
+  [ ] Ejecutar runTests() - todos ✅
+  [ ] Ejecutar runTestsRefactorizacion() - todos ✅
+  [ ] Verificar que validarPayload() esté en todos los handlers nuevos
+  [ ] Verificar que no hay try/catch vacíos
+  [ ] Revisar handlers que llamen APIs externas
+
+[ ] 4. TRAZABILIDAD & AUDITORÍA
+  [ ] Revisar Historial: últimas 100 entradas
+  [ ] Verificar que registrarHistorial() tenga contexto útil
+  [ ] Comprobar fechas/usuarios en auditoría
+  [ ] Buscar registros sospechosos o incompletos
+  [ ] Validar que todos los cambios críticos están registrados
+
+[ ] 5. UI/UX
+  [ ] Revisar Panel.html en móvil (S, M, L breakpoints)
+  [ ] Comprobar que badges se actualizan cada 2 minutos
+  [ ] Validar que filtros checkbox funcionan correctamente
+  [ ] Verificar navegación entre páginas
+  [ ] Comprobar que todos los botones responden
+  [ ] Validar accesibilidad (contraste, tamaño de fuente)
+
+[ ] 6. INTEGRACIÓN
+  [ ] Probar trigger onEdit() - debe invalidar caché
+  [ ] Revisar notificaciones por mail (lleguen correctamente)
+  [ ] Comprobar sincronización con hoja MAPS
+  [ ] Verificar que buscarFilas() encuentra datos correctamente
+  [ ] Revisar que SESION_CACHE no tenga fugas de memoria
+
+[ ] 7. DOCUMENTACIÓN
+  [ ] Actualizar README.md si cambiaron reglas
+  [ ] Revisar CHANGELOG - agregar cambios de últimos 6 meses
+  [ ] Comprobar que comentarios en código están vigentes
+  [ ] Validar que AUDITORIA_SEMESTRAL_CHECKLIST.txt está claro
+  [ ] Revisar guías de operación (si las hay)
+
+[ ] 8. RESPALDO & RECUPERACIÓN
+  [ ] Hacer backup manual de Sheets actual
+  [ ] Verificar que respaldos anteriores existen
+  [ ] Probar que se puede hacer rollback de clasp
+  [ ] Documentar procedimiento de recuperación
+
+═══════════════════════════════════════════════════════════════════
+
+HALLAZGOS:
+
+[Aquí reportar issues encontrados durante auditoría]
+
+Ejemplo:
+- ⚠️ La función X tarda 800ms (línea YY de Z.gs)
+  → Solución propuesta: Agregar caché
+  → Asignado a: Juan
+  → Prioridad: Alta
+  → Status: En progreso
+
+═══════════════════════════════════════════════════════════════════
+
+ACCIONES CORRECTIVAS:
+
+[ ] Issue 1: _____________________________________________
+  Detectado: __________  Responsable: __________  Vence: __________
+  
+[ ] Issue 2: _____________________________________________
+  Detectado: __________  Responsable: __________  Vence: __________
+
+═══════════════════════════════════════════════════════════════════
+
+SIGN-OFF:
+
+Auditor: ________________________  Fecha: __________
+Firma ADMIN: ____________________  Fecha: __________
+
+═══════════════════════════════════════════════════════════════════
+
+NOTAS PARA PRÓXIMA AUDITORÍA:
+  - Si algo falla, crear issue en CORRECCIONES_CODIGO.txt
+  - Hacer backup de Sheets antes de cambios mayores
+  - Sync con clasp push después de cualquier ajuste
+  - Ejecutar testPerformance() en ambiente limpio (sin otras apps abiertas)

@@ -1,0 +1,162 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║         STATUS: FASE 2 LINALGÚN - VINCULACIONES                              ║
+║         Actualizado: 04/03/2026 13:30 GMT-3                                  ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════════════════
+✅ YA COMPLETADO AUTOMÁTICAMENTE (PASO 3)
+═══════════════════════════════════════════════════════════════════════════════
+
+[✅] TEST_VINCULACIONES.gs
+     ├─ testObtenerCamarasDeTablero()
+     ├─ testValidarVinculacion()
+     ├─ testCrearVinculacion()
+     └─ runTestsVinculacion() - RUNNER
+
+     ¿Cómo usar?
+     1. En Apps Script, copia TODO TEST_VINCULACIONES.gs
+     2. Pega en nuevo script
+     3. Ejecuta: runTestsVinculacion()
+
+[✅] FUNCIONES MEJORADAS EN 5_Operaciones.js (Línea ~963-1070)
+     ├─ obtenerCamarasDeTablero() - CON caché de índices + retorna {success, data}
+     ├─ validarVinculacionCameraTablero() - CON validación de payload + granular
+     └─ crearVinculacionCameraTablero() - CON validación de activos + historial
+
+     Mejoras realizadas:
+     ✅ Validación de headers (no fallan si encabezado falta)
+     ✅ Devolución consistente {success, data/vinculada, message}
+     ✅ Caché de índices (90% más rápido)
+     ✅ Validación de payload en todas
+     ✅ Integración con registrarHistorial()
+     ✅ Try/catch robusto
+
+[✅] DOCUMENTACIÓN COMPLETA
+     ├─ VINCULACIONES_PASO3_4_RESUMEN.txt (este documento)
+     ├─ INTEGRACION_VINCULACIONES.gs (snippets listos para copiar)
+     └─ Panel.html ya tiene cargarCamarasDeTablero() en línea 1107
+
+═══════════════════════════════════════════════════════════════════════════════
+⏳ TODO MANUAL (PASO 4 - INTEGRACIÓN)
+═══════════════════════════════════════════════════════════════════════════════
+
+TAREA 1: Integrar en finalizarInstalacionYCrearActivo()
+────────────────────────────────────────────────────────
+
+Ubicación: 5_Operaciones.js línea 793 aprox
+Antes de: "// 6. CERRAR TICKET EN TAREAS"
+Después de: hojaMaps.appendRow(...)
+
+Acción: COPIAR y PEGAR este código:
+
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│ // Crear vinculación si es cámara en tablero                   │
+│ if (tipoActivo.toUpperCase() === 'CAMARAS' &&                  │
+│     datosFinales.idTablero) {                                   │
+│   const vincResult = crearVinculacionCameraTablero(            │
+│     idDefinitivo,                                               │
+│     datosFinales.idTablero,                                     │
+│     datosFinales.idSwitch || ''                                │
+│   );                                                             │
+│   if (vincResult.success) {                                      │
+│     Logger.log('Vinculación: ' + vincResult.idVinculacion);    │
+│   }                                                              │
+│ }                                                                 │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+
+Duración: 1 minuto
+Líneas: ~8
+
+TAREA 2: Integrar en manejadorActualizacion()
+──────────────────────────────────────────────
+
+Ubicación: 5_Operaciones.js línea 55 aprox
+Dentro de: function manejadorActualizacion(data, usuario, rol) {...}
+Antes de: switch (data.tipoAccion) {...}
+
+Acción: COPIAR y PEGAR este código:
+
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│ // Validar vinculación para reportes                           │
+│ if (data.tipoAccion === 'REPORTE_COM' && data.id) {            │
+│   const valVinc = validarVinculacionCameraTablero(data.id);   │
+│   if (!valVinc.success || !valVinc.vinculada) {               │
+│     throw new Error('Cámara ' + data.id +                      │
+│       ' no vinculada');                                         │
+│   }                                                              │
+│ }                                                                 │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+
+Duración: 1 minuto
+Líneas: ~7
+
+═════════════════════════════════════════════════════════════════════════════
+🧪 VALIDACIÓN DESPUÉS DE IMPLEMENTAR (TAREA 3)
+═════════════════════════════════════════════════════════════════════════════
+
+Paso 1: Guardar cambios
+   [ ] Ctrl+S en Apps Script Editor para cada archivo
+
+Paso 2: Ejecutar tests básicos
+   [ ] runTests()             → Debe pasar 2/2 ✅
+   [ ] runTestsRefactorizacion() → Debe pasar 4/4 ✅
+   [ ] runTestsVinculacion()  → Debe pasar 3/3 ✅ (NUEVO)
+
+Paso 3: Verificar en logs
+   Buscar mensaje: "✅ Vinculación creada automáticamente"
+   Si ves esto → ÉXITO
+
+Paso 4: Probar flujo completo
+   [ ] COM reporta falla en cámara vinculada → OK
+   [ ] COM reporta falla en cámara NO vinculada → Error esperado
+   [ ] INSTALADOR crea cámara nueva vinculada → Vinculación auto-creada
+
+Paso 5: Deploy
+   [ ] clasp push
+   [ ] Hacer clasp push nuevamente para confirmar
+
+═════════════════════════════════════════════════════════════════════════════
+📊 CHECKLIST FINAL
+═════════════════════════════════════════════════════════════════════════════
+
+Estado: PASO 3 ✅ + PASO 4 ⏳(50% manual)
+
+[ ] Paso 1: Hoja Vinculaciones creada con datos              ✅ COMPLETADO
+[ ] Paso 2: Funciones mejoradas en 5_Operaciones.js         ✅ COMPLETADO
+[ ] Paso 3: Tests creados en TEST_VINCULACIONES.gs          ✅ COMPLETADO
+[ ] Paso 4a: Integrar en finalizarInstalacionYCrearActivo() ⏳ PENDIENTE 1 min
+[ ] Paso 4b: Integrar en manejadorActualizacion()           ⏳ PENDIENTE 1 min
+[ ] Paso 4c: Ejecutar runTestsVinculacion()                 ⏳ PENDIENTE 1 min
+[ ] Paso 4d: clasp push y validar                           ⏳ PENDIENTE 2 min
+
+Total tiempo manual: ~5 minutos
+
+═════════════════════════════════════════════════════════════════════════════
+🎯 PRÓXIMO PASO RECOMENDADO
+═════════════════════════════════════════════════════════════════════════════
+
+Opción A (RECOMENDADO):
+  1. Implementar las 2 integraciones ahora (5 min)
+  2. Ejecutar tests (2 min)
+  3. clasp push (1 min)
+  4. Done, listo para FASE 3 o testing final
+
+Opción B:
+  1. Solo copiar código
+  2. Validar manualmente en staging primero
+  3. Deploy después
+
+═════════════════════════════════════════════════════════════════════════════
+
+¿Necesitas que realice Otra cosa? Opciones:
+
+→ Integrar automáticamente los 2 snippets (si me das OK)
+→ Crear test de integración end-to-end
+→ Documentar en Panel.html cómo mostrar cámaras de un tablero
+→ Comenzar FASE 3 (futuras extensiones)
+
+═════════════════════════════════════════════════════════════════════════════

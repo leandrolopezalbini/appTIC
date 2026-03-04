@@ -1,4 +1,79 @@
 //2_Consultas.gs
+// ═══════════════════════════════════════════════════════════════════════════
+// CACHE DE HOJAS - Optimización de búsquedas
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Almacena en memoria las hojas principales para evitar lecturas repetidas
+ * Formato: { TABLEROS: [[...], [...]], CAMARAS: [...], ... }
+ */
+const CACHE_SHEETS = {};
+
+/**
+ * Timestamp de cuando se última precargó el caché
+ * Si pasó 5 minutos, se actualiza automáticamente
+ */
+let CACHE_TIMESTAMP = 0;
+
+/**
+ * Tiempo que el caché es válido (5 minutos = 300,000 ms)
+ */
+const CACHE_VALIDITY = 5 * 60 * 1000;
+
+/**
+ * Precarga TODAS las hojas importantes en memoria
+ * SE EJECUTA AUTOMÁTICAMENTE en buscadorMaestro() si el caché expiró
+ * 
+ * @return {Object} { success: true, cached: 6 } ← número de hojas cacheadas
+ */
+function precargarCacheHojas() {
+  const ahora = new Date().getTime();
+  
+  // Si el caché aún es válido, no recarga
+  if (CACHE_TIMESTAMP && (ahora - CACHE_TIMESTAMP) < CACHE_VALIDITY) {
+    Logger.log("⏱️  Caché aún válido, no recarga");
+    return { success: true, cached: Object.keys(CACHE_SHEETS).length };
+  }
+
+  try {
+    const categoriasACargar = ['TABLEROS', 'CAMARAS', 'ALARMAS', 'SWITCHES', 'TAREAS'];
+
+    categoriasACargar.forEach(tipo => {
+      try {
+        const hoja = obtenerHoja(HOJA[tipo]);
+        CACHE_SHEETS[tipo] = hoja.getDataRange().getValues();
+        Logger.log("📦 Caché: " + tipo + " (" + CACHE_SHEETS[tipo].length + " filas)");
+      } catch(e) {
+        Logger.log(`⚠️  Error precargando ${tipo}: ${e.message}`);
+      }
+    });
+
+    CACHE_TIMESTAMP = ahora;
+    Logger.log("✅ Caché precargado: " + Object.keys(CACHE_SHEETS).length + " hojas");
+    
+    return { 
+      success: true, 
+      cached: Object.keys(CACHE_SHEETS).length,
+      validUntil: new Date(ahora + CACHE_VALIDITY).toString()
+    };
+
+  } catch (e) {
+    Logger.log("❌ Error precargando caché: " + e.message);
+    CACHE_SHEETS = {};
+    return { success: false, error: e.message };
+  }
+}
+
+/**
+ * Limpia el caché (útil si editas hojas manualmente)
+ * Usa: limpiarCache() luego buscas de nuevo
+ */
+function limpiarCache() {
+  CACHE_SHEETS = {};
+  CACHE_TIMESTAMP = 0;
+  Logger.log("✅ Caché limpiado, próxima búsqueda lo recargará");
+}
+
 function _getDatosTableros() {
     const hoja = obtenerHoja(HOJA.TABLEROS);
     const vals = hoja.getDataRange().getValues();
