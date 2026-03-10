@@ -1159,13 +1159,13 @@
         })
         .actualizarBadgeTareas();
     }
-DATA_MAESTRA = DATA_MAESTRA.map(item => ({
-  ...item,
-  _index: (
-    (item.ID || '') + ' ' +
-    (item.DIRECCION || '')
-  ).toUpperCase()
-}));
+    DATA_MAESTRA = DATA_MAESTRA.map(item => ({
+      ...item,
+      _index: (
+        (item.ID || '') + ' ' +
+        (item.DIRECCION || '')
+      ).toUpperCase()
+    }));
     // Ejecuta al cambiar checkboxes
     document.querySelectorAll('input[id^="chk-estado-"]').forEach(chk => {
       chk.addEventListener('change', filtrarTabla);
@@ -1377,12 +1377,12 @@ DATA_MAESTRA = DATA_MAESTRA.map(item => ({
         .obtenerDashboardSeguimiento();
     }
 
-    function escaparHTML(texto){
-  return texto
-   .replace(/&/g,"&amp;")
-   .replace(/</g,"&lt;")
-   .replace(/>/g,"&gt;");
-}
+    function escaparHTML(texto) {
+      return texto
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
 
     function abrirFichaTecnica(id, tipo) {
       // 1. Cerrar modal si estuviera abierto
@@ -1794,11 +1794,11 @@ DATA_MAESTRA = DATA_MAESTRA.map(item => ({
       htmlBotones += `
     </div>`;
 
-    const contenedor = document.getElementById('contenedor-botones-accion');
-    if (contenedor) contenedor.innerHTML = htmlBotones;
+      const contenedor = document.getElementById('contenedor-botones-accion');
+      if (contenedor) contenedor.innerHTML = htmlBotones;
 
-    modal.open();
-  }
+      modal.open();
+    }
     // --- FUNCIONES TÉCNICAS ---
     function prepararReemplazo(idUbicacion) {
       const idNuevo = prompt(`Sustitución para ${idUbicacion}.\nIngrese el ID del nuevo hardware (Ej: CAM-SN-123 o CAM-L-001):`);
@@ -2041,14 +2041,14 @@ DATA_MAESTRA = DATA_MAESTRA.map(item => ({
 
         // Si hay búsqueda de texto, aplicar
         let cumpleTexto = true;
-        if(busquedaActual.length === 0){
+        if (busquedaActual.length === 0) {
           listaUI.innerHTML = `
           <li class="collection-item center grey-text">
           <i class="material-icons large">search</i>
           <p>Escribí para buscar activos</p>
           </li>`;
           return;
-          }
+        }
 
         // Si hay tipos seleccionados, validar tipo
         let cumpleTipo = !filtrarPorTipo || tiposSeleccionados.includes(tipoStr);
@@ -2197,17 +2197,15 @@ DATA_MAESTRA = DATA_MAESTRA.map(item => ({
         });
       });
 
-let timerBusqueda;
+      document.getElementById("input-busqueda-maestra")
+        .addEventListener("input", function () {
 
-document.getElementById("input-busqueda-maestra")
-  .addEventListener("input", function () {
+          clearTimeout(timerBusqueda);
 
-    clearTimeout(timerBusqueda);
-
-    timerBusqueda = setTimeout(() => {
-        ejecutarBusquedaMaestra(this.value);
-    }, 200);
-});
+          timerBusqueda = setTimeout(() => {
+            ejecutarBusquedaMaestra(this.value);
+          }, 200);
+        });
 
       // Forzar mayúsculas en IDs
       ['idDefinitivo', 'energia-id-oculto', 'red-id-oculto'].forEach(id => {
