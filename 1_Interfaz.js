@@ -1,5 +1,6 @@
 //1_Interfaz.gs
-
+/* eslint-env browser */
+/* global google, M */
 function doGet() {
     return HtmlService.createTemplateFromFile('Panel') 
         .evaluate()

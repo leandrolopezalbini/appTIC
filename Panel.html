@@ -10,7 +10,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
   <style>
-
     /* ================== ESTILOS GLOBALES / BASE ================== */
     :root {
       --azul-principal: #0d47a1;
@@ -104,6 +103,66 @@
       margin-right: 5px;
     }
 
+    /* Estilos para la lista de resultados del buscador */
+    #lista-resultados-maestros .collection-item.avatar {
+      padding-left: 72px;
+      min-height: 72px;
+    }
+
+    #lista-resultados-maestros .collection-item.avatar i.circle {
+      position: absolute;
+      left: 15px;
+      top: 15px;
+      width: 42px;
+      height: 42px;
+      line-height: 42px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+    }
+
+    #lista-resultados-maestros .collection-item.avatar i.blue {
+      background-color: #2196F3;
+    }
+
+    #lista-resultados-maestros .collection-item.avatar i.red {
+      background-color: #f44336;
+    }
+
+    #lista-resultados-maestros .collection-item.avatar i.green {
+      background-color: #4CAF50;
+    }
+
+    #lista-resultados-maestros .collection-item.avatar i.orange {
+      background-color: #FF9800;
+    }
+
+    #lista-resultados-maestros .collection-item.avatar i.purple {
+      background-color: #9C27B0;
+    }
+
+    #lista-resultados-maestros .collection-item.avatar i.amber {
+      background-color: #FFC107;
+      color: #333 !important;
+    }
+
+    /* Mejorar modal de detalle para UX */
+    .modal {
+      max-width: 460px;
+      width: 90%;
+    }
+
+    .modal .modal-content {
+      padding: 20px 24px;
+    }
+
+    .modal .modal-footer {
+      padding-right: 24px;
+    }
+
     /* ================== TARJETAS DEL PANEL ================== */
     .cuadricula-panel {
       display: grid;
@@ -140,6 +199,22 @@
       transform: translateY(-5px);
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
       filter: brightness(1.1);
+    }
+
+    /* mejoras UX para listas */
+    .collection-item:hover {
+      background-color: #fafafa;
+    }
+
+    /* botones del modal más amplios en móvil */
+    #contenedor-botones-accion .btn {
+      font-size: 0.95rem;
+      justify-content: start;
+      padding-left: 12px;
+    }
+
+    #contenedor-botones-accion .btn i.left {
+      margin-right: 8px;
     }
 
     /* Colores por tarjeta */
@@ -182,11 +257,20 @@
       display: block;
       /* Corregido: antes estaba en none */
     }
+
     /* Bordes laterales de colores para las tareas */
 
-    .border-left-blue { border-left: 5px solid #2196F3 !important; }
-    .border-left-green { border-left: 5px solid #4CAF50 !important; }
-    .border-left-orange { border-left: 5px solid #FF9800 !important; }
+    .border-left-blue {
+      border-left: 5px solid #2196F3 !important;
+    }
+
+    .border-left-green {
+      border-left: 5px solid #4CAF50 !important;
+    }
+
+    .border-left-orange {
+      border-left: 5px solid #FF9800 !important;
+    }
 
     .card.hoverable:hover {
       transform: translateY(-2px);
@@ -194,7 +278,8 @@
     }
 
     .card.hoverable:active {
-      transform: scale(0.98); /* Efecto de click en móvil */
+      transform: scale(0.98);
+      /* Efecto de click en móvil */
     }
 
     /* ================== FORMULARIOS Y ELEMENTOS ================== */
@@ -312,24 +397,31 @@
       <div class="card">
         <div class="card-content">
           <span class="card-title" style="font-weight: bold; color: var(--azul-principal);">Buscadoro</span>
-          
-          <div id="filtrosBusqueda" style="margin-top: 15px; margin-bottom: 5px; display:flex; flex-wrap:wrap; gap:10px;">
-            <label><input type="checkbox" class="filled-in" value="TABLEROS" /><span>Tableros</span></label>
-            <label><input type="checkbox" class="filled-in" value="CAMARAS" checked/><span>Cámaras</span></label>
+
+          <div id="filtrosBusqueda"
+            style="margin-top: 15px; margin-bottom: 5px; display:flex; flex-wrap:wrap; gap:10px;">
+            <label><input type="checkbox" class="filled-in" value="TABLEROS" checked /><span>Tableros</span></label>
+            <label><input type="checkbox" class="filled-in" value="CAMARAS" checked /><span>Cámaras</span></label>
             <label><input type="checkbox" class="filled-in" value="ALARMAS" /><span>Alarmas</span></label>
             <label><input type="checkbox" class="filled-in" value="SWITCHES" /><span>Switches</span></label>
-            <label><input type="checkbox" class="filled-in" value="TAREAS"/><span>Tareas</span></label>
-            <label><input type="checkbox" class="filled-in" value="SOLICITUDES"/><span>Solicitudes</span></label>
+            <label><input type="checkbox" class="filled-in" value="TAREAS" /><span>Tareas</span></label>
+            <label><input type="checkbox" class="filled-in" value="SOLICITUDES" /><span>Solicitudes</span></label>
           </div>
-          
-    
-          <div class="input-field" style="margin-top: 0;">
+
+
+          <div class="input-field" style="margin-top: 0; position: relative;">
             <i class="material-icons prefix">search</i>
-            <input type="text" id="input-busqueda-maestra"placeholder="Buscar ID o Dirección...">
+            <input type="text" id="input-busqueda-maestra" placeholder="Buscar ID o Dirección...">
+            <button type="button" id="btnLimpiarBusqueda" class="btn-small red waves-effect"
+              style="position: absolute; right: 0; top: 5px; display: none; margin-right: 10px;"
+              onclick="limpiarBuscador()">
+              <i class="material-icons tiny">clear</i>
+            </button>
           </div>
-    
-          <ul class="collection" id="lista-resultados-maestros" style="border: none;">
-            </ul>
+
+          <ul class="collection" id="lista-resultados-maestros"
+            style="border: none; max-height: 400px; overflow-y: auto;">
+          </ul>
         </div>
       </div>
     </div>
@@ -358,17 +450,17 @@
   <div id="nuevo-page" class="page-content">
     <div class="btn-volver" data-page="panel"><i class="material-icons">arrow_back</i> Volver al Panel</div>
     <button class="btn-flat waves-effect grey-text" onclick="volverAlPanel()">
-        <i class="material-icons left">arrow_back</i> VOLVER
+      <i class="material-icons left">arrow_back</i> VOLVER
     </button>
     <div class="contenedor-formulario">
       <h2>Solicitud de Nuevo Activo</h2>
       <form id="form-nuevo-tablero">
         <div class="input-field">
           <select id="tipoActivo" required>
-             <option value="" disabled selected>Seleccione Tipo</option>
-             <option value="TABLEROS">Tablero</option>
-             <option value="CAMARAS">Cámara</option>
-             <option value="ALARMAS">Alarma</option>
+            <option value="" disabled selected>Seleccione Tipo</option>
+            <option value="TABLEROS">Tablero</option>
+            <option value="CAMARAS">Cámara</option>
+            <option value="ALARMAS">Alarma</option>
           </select>
           <label>Tipo de Dispositivo</label>
         </div>
@@ -389,7 +481,7 @@
         <div class="row">
           <div class="col s12 center-align">
             <button type="button" onclick="obtenerGPS()" class="btn waves-effect blue darken-2">
-            <i class="material-icons left">my_location</i> UBICACION ACTUAL</button>
+              <i class="material-icons left">my_location</i> UBICACION ACTUAL</button>
             <p id="ubicacionStatus" style="font-size: 0.8rem; margin: 10px 0; font-weight: bold;"></p>
           </div>
         </div>
@@ -400,21 +492,21 @@
         <input type="hidden" id="edit_id_activo" value="">
         <div class="center-align" style="margin-top: 20px;">
           <button type="submit" class="btn-large waves-effect waves-light blue darken-3" style="width:100%;">
-          <i class="material-icons left">send</i> ENVIAR SOLICITUD</button>
+            <i class="material-icons left">send</i> ENVIAR SOLICITUD</button>
         </div>
       </form>
     </div>
   </div>
 
   <div id="modal-detalle" class="modal">
-      <div class="modal-content">
-          <h4 id="detalle-titulo">Detalle del Activo</h4>
-          <div id="contenedor-botones-accion">
-              </div>
+    <div class="modal-content">
+      <h4 id="detalle-titulo">Detalle del Activo</h4>
+      <div id="contenedor-botones-accion">
       </div>
-      <div class="modal-footer">
-          <a href="#!" class="modal-close waves-effect btn-flat">Cerrar</a>
-      </div>
+    </div>
+    <div class="modal-footer">
+      <a href="#!" class="modal-close waves-effect btn-flat" onclick="limpiarBuscador()">Cerrar</a>
+    </div>
   </div>
 
   <div id="dashboard-seguimiento" class="page-content">
@@ -462,13 +554,13 @@
       </table>
     </div>
   </div>
-<div id="detalle-activo-page" class="page-content" style="display:none;">
+  <div id="detalle-activo-page" class="page-content" style="display:none;">
     <div class="btn-volver" onclick="showPage('panel-page')">
-        <i class="material-icons">arrow_back</i> Volver al Panel
+      <i class="material-icons">arrow_back</i> Volver al Panel
     </div>
     <div class="container">
-        <div id="contenedor-detalle-ficha">
-            </div>
+      <div id="contenedor-detalle-ficha">
+      </div>
     </div>
   </div>
 
@@ -477,7 +569,9 @@
     <div class="container">
       <h4>Gestión de Incidencias Técnicas</h4>
       <div id="contenedor-tareas-tecnico">
-        <div class="progress"><div class="indeterminate"></div></div>
+        <div class="progress">
+          <div class="indeterminate"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -533,100 +627,106 @@
   </div>
   <div id="tareas-tecnico" class="page-content" style="display:none;">
     <div class="btn-volver" onclick="showPage('panel')">
-        <i class="material-icons">arrow_back</i> Volver al Menú
+      <i class="material-icons">arrow_back</i> Volver al Menú
     </div>
 
     <div class="container">
-        <h5 class="center-align" style="font-weight: bold; color: #1565c0;">Mis Tareas Asignadas</h5>
-        <p class="center-align gray-text">Seleccione una tarea para finalizar la instalación física.</p>
-        
-        <div id="contenedor-tareas-cards" class="row">
-            <div class="center-align" id="loader-tareas">
-                <div class="preloader-wrapper small active">
-                    <div class="spinner-layer spinner-blue-only">
-                        <div class="circle-clipper left"><div class="circle"></div></div>
-                        <div class="gap-patch"><div class="circle"></div></div>
-                        <div class="circle-clipper right"><div class="circle"></div></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-  </div>
-  <div id="mantenimiento-checklist-page" class="page-content" style="display:none;">
-  <div class="container">
-    <div class="card">
-      <div class="card-content">
-        <span class="card-title blue-text"><i class="material-icons left">build</i>Mantenimiento en Sitio</span>
-        <p id="maint-info-activo" class="grey-text text-darken-2" style="margin-bottom:20px;"></p>
-        
-        <form id="form-mantenimiento">
-          <input type="hidden" id="maint-id">
-          
-          <div class="row">
-            <div class="col s12">
-              <h6><b>1. Conectividad y Red</b></h6>
-              <p>
-                <label>
-                  <input type="checkbox" id="maint-switch" class="filled-in" />
-                  <span>Switch funcionando (Link OK)</span>
-                </label>
-              </p>
-              <p>
-                <label>
-                  <input type="checkbox" id="maint-bocas" class="filled-in" />
-                  <span>Todas las bocas del Switch operativas</span>
-                </label>
-              </p>
-            </div>
+      <h5 class="center-align" style="font-weight: bold; color: #1565c0;">Mis Tareas Asignadas</h5>
+      <p class="center-align gray-text">Seleccione una tarea para finalizar la instalación física.</p>
 
-            <div class="col s12" style="margin-top:20px;">
-              <h6><b>2. Cableado y Fichas</b></h6>
-              <div class="input-field col s12 m6" style="padding-left: 0;">
-                <input type="number" id="maint-cable" placeholder="0">
-                <label for="maint-cable">Metros de cable reemplazados (aprox)</label>
+      <div id="contenedor-tareas-cards" class="row">
+        <div class="center-align" id="loader-tareas">
+          <div class="preloader-wrapper small active">
+            <div class="spinner-layer spinner-blue-only">
+              <div class="circle-clipper left">
+                <div class="circle"></div>
               </div>
-              <p class="col s12">
-                <label>
-                  <input type="checkbox" id="maint-fichas" class="filled-in" />
-                  <span>Se reemplazaron fichas RJ45</span>
-                </label>
-              </p>
-            </div>
-
-            <div class="col s12" style="margin-top:20px;">
-              <h6><b>3. Cámara y Óptica</b></h6>
-              <p>
-                <label>
-                  <input type="checkbox" id="maint-limpieza" class="filled-in" />
-                  <span>Limpieza de lente / domo realizada</span>
-                </label>
-              </p>
-              <p>
-                <label>
-                  <input type="checkbox" id="maint-enfoque" class="filled-in" />
-                  <span>Re-enfocado / Re-apuntado realizado</span>
-                </label>
-              </p>
-            </div>
-
-            <div class="input-field col s12" style="margin-top:20px;">
-              <i class="material-icons prefix">mode_edit</i>
-              <textarea id="maint-obs" class="materialize-textarea"></textarea>
-              <label for="maint-obs">Detalles técnicos adicionales</label>
+              <div class="gap-patch">
+                <div class="circle"></div>
+              </div>
+              <div class="circle-clipper right">
+                <div class="circle"></div>
+              </div>
             </div>
           </div>
-
-          <div class="card-action right-align">
-            <button type="button" class="btn-flat btn-volver">Cancelar</button>
-            <button type="submit" class="btn blue waves-effect">
-              <i class="material-icons left">send</i>Guardar Informe
-            </button>
-          </div>
-        </form>
+        </div>
       </div>
     </div>
   </div>
+  <div id="mantenimiento-checklist-page" class="page-content" style="display:none;">
+    <div class="container">
+      <div class="card">
+        <div class="card-content">
+          <span class="card-title blue-text"><i class="material-icons left">build</i>Mantenimiento en Sitio</span>
+          <p id="maint-info-activo" class="grey-text text-darken-2" style="margin-bottom:20px;"></p>
+
+          <form id="form-mantenimiento">
+            <input type="hidden" id="maint-id">
+
+            <div class="row">
+              <div class="col s12">
+                <h6><b>1. Conectividad y Red</b></h6>
+                <p>
+                  <label>
+                    <input type="checkbox" id="maint-switch" class="filled-in" />
+                    <span>Switch funcionando (Link OK)</span>
+                  </label>
+                </p>
+                <p>
+                  <label>
+                    <input type="checkbox" id="maint-bocas" class="filled-in" />
+                    <span>Todas las bocas del Switch operativas</span>
+                  </label>
+                </p>
+              </div>
+
+              <div class="col s12" style="margin-top:20px;">
+                <h6><b>2. Cableado y Fichas</b></h6>
+                <div class="input-field col s12 m6" style="padding-left: 0;">
+                  <input type="number" id="maint-cable" placeholder="0">
+                  <label for="maint-cable">Metros de cable reemplazados (aprox)</label>
+                </div>
+                <p class="col s12">
+                  <label>
+                    <input type="checkbox" id="maint-fichas" class="filled-in" />
+                    <span>Se reemplazaron fichas RJ45</span>
+                  </label>
+                </p>
+              </div>
+
+              <div class="col s12" style="margin-top:20px;">
+                <h6><b>3. Cámara y Óptica</b></h6>
+                <p>
+                  <label>
+                    <input type="checkbox" id="maint-limpieza" class="filled-in" />
+                    <span>Limpieza de lente / domo realizada</span>
+                  </label>
+                </p>
+                <p>
+                  <label>
+                    <input type="checkbox" id="maint-enfoque" class="filled-in" />
+                    <span>Re-enfocado / Re-apuntado realizado</span>
+                  </label>
+                </p>
+              </div>
+
+              <div class="input-field col s12" style="margin-top:20px;">
+                <i class="material-icons prefix">mode_edit</i>
+                <textarea id="maint-obs" class="materialize-textarea"></textarea>
+                <label for="maint-obs">Detalles técnicos adicionales</label>
+              </div>
+            </div>
+
+            <div class="card-action right-align">
+              <button type="button" class="btn-flat grey-text" onclick="showPage('panel-page')">Cancelar</button>
+              <button type="submit" class="btn blue waves-effect">
+                <i class="material-icons left">send</i>Guardar Informe
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div id="pedido-insumos-page" class="page-content">
@@ -659,14 +759,13 @@
             <label for="cantUPS">UPS / Fuentes 12V</label>
           </div>
           <div class="input-field col s12">
-            <textarea id="obsInsumos" class="materialize-textarea"
-                        placeholder="Algún detalle adicional..."></textarea>
+            <textarea id="obsInsumos" class="materialize-textarea" placeholder="Algún detalle adicional..."></textarea>
             <label for="obsInsumos">Notas del Instalador</label>
           </div>
         </div>
         <button type="submit" class="btn blue darken-3" style="width:100%;">
-               <i class="material-icons left">send</i> Enviar Pedido a Laboratorio
-               </button>
+          <i class="material-icons left">send</i> Enviar Pedido a Laboratorio
+        </button>
       </form>
     </div>
   </div>
@@ -714,21 +813,21 @@
         <input type="hidden" id="tableroConectividadId" class="id-activo-comun">
         <div class="input-field">
           <select id="proveedorConectividad" required onchange="toggleDetalleProveedor(this.value)">
-                     <option value="" disabled selected>Seleccione Proveedor</option>
-                     <option value="IPNEXT">IPNEXT</option>
-                     <option value="MUNICIPALIDAD">Municipalidad (Cableado)</option>
-                     <option value="INTERFAS">INTERFAS</option>
-                     <option value="OTRO">Otro Proveedor</option>
-                  </select>
+            <option value="" disabled selected>Seleccione Proveedor</option>
+            <option value="IPNEXT">IPNEXT</option>
+            <option value="MUNICIPALIDAD">Municipalidad (Cableado)</option>
+            <option value="INTERFAS">INTERFAS</option>
+            <option value="OTRO">Otro Proveedor</option>
+          </select>
           <label>Proveedor de Enlace</label>
         </div>
         <div class="input-field">
           <select id="tipoConectividad" required>
-                     <option value="" disabled selected>Seleccione Tipo de Medio</option>
-                     <option value="FIBRA">Fibra Óptica</option>
-                     <option value="ANTENA">Antena (Aire)</option>
-                     <option value="CABLE">Cableado UTP/Estructurado</option>
-                  </select>
+            <option value="" disabled selected>Seleccione Tipo de Medio</option>
+            <option value="FIBRA">Fibra Óptica</option>
+            <option value="ANTENA">Antena (Aire)</option>
+            <option value="CABLE">Cableado UTP/Estructurado</option>
+          </select>
           <label>Tipo de Conexión</label>
         </div>
         <div id="wrapper-otro-proveedor" class="input-field" style="display:none;">
@@ -740,8 +839,8 @@
           <label for="obsConectividad">Observaciones del Enlace</label>
         </div>
         <button type="submit" class="btn green darken-2" style="width:100%;">
-               <i class="material-icons left">settings_input_antenna</i> Registrar Conectada
-               </button>
+          <i class="material-icons left">settings_input_antenna</i> Registrar Conectada
+        </button>
       </form>
     </div>
   </div>
@@ -762,93 +861,93 @@
   </div>
 
   <div id="verificar-energia-page" class="page-content" style="display:none;">
-  <div class="container">
-    <h5><i class="material-icons orange-text">bolt</i> Verificar Energía</h5>
-    <p>Activo: <b class="label-activo-comun"></b></p>
-    <input type="hidden" class="id-activo-comun" id="energia-id-oculto">
+    <div class="container">
+      <h5><i class="material-icons orange-text">bolt</i> Verificar Energía</h5>
+      <p>Activo: <b class="label-activo-comun"></b></p>
+      <input type="hidden" class="id-activo-comun" id="energia-id-oculto">
 
-    <div class="card-panel">
-      <label>Estado de Energía</label>
-      <select id="energia-estado" class="browser-default" onchange="toggleInsumos(this.value)">
-        <option value="SIN ENERGIA">❌ SIN ENERGIA</option>
-        <option value="ENERGIZADA">✅ ENERGIZADA</option>
-      </select>
+      <div class="card-panel">
+        <label>Estado de Energía</label>
+        <select id="energia-estado" class="browser-default" onchange="toggleInsumos(this.value)">
+          <option value="SIN ENERGIA">❌ SIN ENERGIA</option>
+          <option value="ENERGIZADA">✅ ENERGIZADA</option>
+        </select>
 
-      <label style="margin-top:15px; display:block;">Proveedor / Fuente</label>
-      <select id="energia-proveedor" class="browser-default">
-        <option value="EDEN">EDEN</option>
-        <option value="COOPERATIVA">COOPERATIVA</option>
-        <option value="MUNICIPALIDAD">MUNICIPALIDAD</option>
-      </select>
+        <label style="margin-top:15px; display:block;">Proveedor / Fuente</label>
+        <select id="energia-proveedor" class="browser-default">
+          <option value="EDEN">EDEN</option>
+          <option value="COOPERATIVA">COOPERATIVA</option>
+          <option value="MUNICIPALIDAD">MUNICIPALIDAD</option>
+        </select>
 
-      <div id="seccion-insumos" style="display:none; margin-top:20px; border-top: 1px solid #ddd; padding-top:10px;">
-        <h6 class="orange-text"><b>Insumos Necesarios:</b></h6>
-        <div class="row">
-          <div class="input-field col s6">
-            <input type="number" id="insumoCamaras" value="0" min="0">
-            <label class="active">Cant. Cámaras</label>
-          </div>
-          <div class="input-field col s6">
-            <input type="number" id="insumoSwitches" value="0" min="0">
-            <label class="active">Cant. Switches</label>
-          </div>
-          <div class="input-field col s6">
-            <input type="number" id="insumoFuentes" value="0" min="0">
-            <label class="active">UPS/Fuentes</label>
-          </div>
-          <div class="input-field col s6">
-            <input type="number" id="insumoCajas" value="0" min="0">
-            <label class="active">Cajas Estancas</label>
+        <div id="seccion-insumos" style="display:none; margin-top:20px; border-top: 1px solid #ddd; padding-top:10px;">
+          <h6 class="orange-text"><b>Insumos Necesarios:</b></h6>
+          <div class="row">
+            <div class="input-field col s6">
+              <input type="number" id="insumoCamaras" value="0" min="0">
+              <label class="active">Cant. Cámaras</label>
+            </div>
+            <div class="input-field col s6">
+              <input type="number" id="insumoSwitches" value="0" min="0">
+              <label class="active">Cant. Switches</label>
+            </div>
+            <div class="input-field col s6">
+              <input type="number" id="insumoFuentes" value="0" min="0">
+              <label class="active">UPS/Fuentes</label>
+            </div>
+            <div class="input-field col s6">
+              <input type="number" id="insumoCajas" value="0" min="0">
+              <label class="active">Cajas Estancas</label>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="input-field" style="margin-top:20px;">
-        <textarea id="obsFinalesEnergia" class="materialize-textarea"></textarea>
-        <label for="obsFinalesEnergia">Observaciones del Relevamiento</label>
-      </div>
+        <div class="input-field" style="margin-top:20px;">
+          <textarea id="obsFinalesEnergia" class="materialize-textarea"></textarea>
+          <label for="obsFinalesEnergia">Observaciones del Relevamiento</label>
+        </div>
 
-      <button class="btn-large green darken-3 w100" onclick="guardarEnergia()">
-        <i class="material-icons left">save</i> GUARDAR Y REGISTRAR
-      </button>
-      
-      <button class="btn-flat btn-volver w100" style="text-align:center;">Cancelar</button>
+        <button class="btn-large green darken-3 w100" onclick="guardarEnergia()">
+          <i class="material-icons left">save</i> GUARDAR Y REGISTRAR
+        </button>
+
+        <button class="btn-flat btn-volver w100" style="text-align:center;">Cancelar</button>
+      </div>
     </div>
-  </div>
   </div>
 
   <div id="verificar-conectividad-page" class="page-content" style="display:none;">
     <div class="container">
-        <h5><i class="material-icons blue-text">lan</i> Verificar Conectividad</h5>
-        <p>Activo: <b class="label-activo-comun"></b></p>
-        <input type="hidden" class="id-activo-comun" id="red-id-oculto">
+      <h5><i class="material-icons blue-text">lan</i> Verificar Conectividad</h5>
+      <p>Activo: <b class="label-activo-comun"></b></p>
+      <input type="hidden" class="id-activo-comun" id="red-id-oculto">
 
-        <div class="card-panel">
-            <label>Estado de Conexión</label>
-            <select id="red-estado" class="browser-default" onchange="toggleRedCampos(this.value)">
-                <option value="CONECTADA">✅ CONECTADA</option>
-                <option value="SIN CONECTIVIDAD">❌ SIN CONECTIVIDAD</option>
-            </select>
+      <div class="card-panel">
+        <label>Estado de Conexión</label>
+        <select id="red-estado" class="browser-default" onchange="toggleRedCampos(this.value)">
+          <option value="CONECTADA">✅ CONECTADA</option>
+          <option value="SIN CONECTIVIDAD">❌ SIN CONECTIVIDAD</option>
+        </select>
 
-            <div id="campos-red-detalle">
-                <label style="margin-top:15px; display:block;">Proveedor</label>
-                <select id="red-proveedor" onchange="mostrarAyudaIP()" class="browser-default">
-                    <option value="INTERFAS">INTERFAS</option>
-                    <option value="IPNEXT">IPNEXT</option>
-                    <option value="MUNICIPALIDAD">MUNICIPALIDAD</option>
-                </select>
+        <div id="campos-red-detalle">
+          <label style="margin-top:15px; display:block;">Proveedor</label>
+          <select id="red-proveedor" onchange="mostrarAyudaIP()" class="browser-default">
+            <option value="INTERFAS">INTERFAS</option>
+            <option value="IPNEXT">IPNEXT</option>
+            <option value="MUNICIPALIDAD">MUNICIPALIDAD</option>
+          </select>
 
-                <label style="margin-top:15px; display:block;">Tipo de Vínculo</label>
-                <select id="red-tipo" class="browser-default">
-                    <option value="FIBRA OPTICA">FIBRA OPTICA</option>
-                    <option value="ANTENA">ANTENA</option>
-                    <option value="CASCADA">CASCADA</option>
-                </select>
-            </div>
-
-            <button class="btn blue w100" style="margin-top:20px;" onclick="guardarRed()">Guardar Conectividad</button>
-            <button class="btn-flat btn-volver w100">Cancelar</button>
+          <label style="margin-top:15px; display:block;">Tipo de Vínculo</label>
+          <select id="red-tipo" class="browser-default">
+            <option value="FIBRA OPTICA">FIBRA OPTICA</option>
+            <option value="ANTENA">ANTENA</option>
+            <option value="CASCADA">CASCADA</option>
+          </select>
         </div>
+
+        <button class="btn blue w100" style="margin-top:20px;" onclick="guardarRed()">Guardar Conectividad</button>
+        <button class="btn-flat btn-volver w100">Cancelar</button>
+      </div>
     </div>
   </div>
 
@@ -862,22 +961,22 @@
             <p>Filtrar por Estado</p>
             <div style="display: flex; flex-wrap: wrap; gap: 15px;">
               <label><input type="radio" name="filtroEstado" value="" checked> <span>Cualquier
-                        Estado</span></label>
+                  Estado</span></label>
               <label><input type="radio" name="filtroEstado" value="PEDIDO">
-                        <span>PEDIDO</span></label>
+                <span>PEDIDO</span></label>
               <label><input type="radio" name="filtroEstado" value="INSTALADO">
-                        <span>INSTALADO</span></label>
+                <span>INSTALADO</span></label>
             </div>
           </div>
           <div class="input-field col s12 m6">
             <p>Filtrar por Energía</p>
             <div style="display: flex; flex-wrap: wrap; gap: 15px;">
               <label><input type="radio" name="filtroEnergia" value="" checked> <span>Cualquier
-                        Energía</span></label>
+                  Energía</span></label>
               <label><input type="radio" name="filtroEnergia" value="PENDIENTE">
-                        <span>PENDIENTE</span></label>
+                <span>PENDIENTE</span></label>
               <label><input type="radio" name="filtroEnergia" value="CONECTADA">
-                        <span>CONECTADA</span></label>
+                <span>CONECTADA</span></label>
             </div>
           </div>
         </div>
@@ -886,11 +985,11 @@
             <p>Filtrar por Conectividad</p>
             <div style="display: flex; flex-wrap: wrap; gap: 15px;">
               <label><input type="radio" name="filtroConectividad" value="" checked> <span>Cualquier
-                        Conectividad</span></label>
+                  Conectividad</span></label>
               <label><input type="radio" name="filtroConectividad" value="PENDIENTE">
-                        <span>PENDIENTE</span></label>
+                <span>PENDIENTE</span></label>
               <label><input type="radio" name="filtroConectividad" value="CONECTADA">
-                        <span>CONECTADA</span></label>
+                <span>CONECTADA</span></label>
             </div>
           </div>
           <div class="input-field col s12 m6">
@@ -901,17 +1000,16 @@
         <div class="row">
           <div class="col s12 m6 l4">
             <button type="submit" class="btn waves-effect waves-light blue darken-1" style="width: 100%;">
-                     <i class="material-icons left">🔍</i> Vista Previa
-                     </button>
+              <i class="material-icons left">🔍</i> Vista Previa
+            </button>
           </div>
           <div class="col s12 m6 l8 right-align">
             <span id="conteoResultados" style="margin-right: 15px; font-weight: bold; font-size: 1.1em;">
-                     Resultados: <span id="countDescarga" class="blue-text darken-2">0</span>
+              Resultados: <span id="countDescarga" class="blue-text darken-2">0</span>
             </span>
-            <button id="btnDescargarInforme" type="button" class="btn waves-effect waves-light red darken-4"
-                        disabled>
-                     <i class="material-icons left">📎</i> Descargar PDF
-                     </button>
+            <button id="btnDescargarInforme" type="button" class="btn waves-effect waves-light red darken-4" disabled>
+              <i class="material-icons left">📎</i> Descargar PDF
+            </button>
           </div>
         </div>
       </form>
@@ -932,9 +1030,9 @@
         Lo sentimos, tu cuenta no tiene los privilegios necesarios para acceder a este módulo.
       </p>
       <button onclick="location.reload()"
-               style="margin-top: 30px; padding: 12px 25px; background: #1a73e8; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
-            VOLVER AL PANEL PRINCIPAL
-            </button>
+        style="margin-top: 30px; padding: 12px 25px; background: #1a73e8; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+        VOLVER AL PANEL PRINCIPAL
+      </button>
     </div>
   </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
@@ -968,12 +1066,6 @@
       });
     }
 
-    function inicializarFiltrosCheckbox() {
-      document.querySelectorAll('#filtrosBusqueda input[type="checkbox"]').forEach(checkbox => {
-        checkbox.addEventListener('change', () => filtrarTabla());
-      });
-    }
-
     // ==========================================
     // 1. VARIABLES GLOBALES Y NAVEGACIÓN
     // ==========================================         
@@ -986,115 +1078,126 @@
       "MUNICIPALIDAD": "192.168.127.xxx"
     };
 
-function showPage(pageId) {
-  document.querySelectorAll('.page-content').forEach(p => p.style.display = 'none');
-  const target = document.getElementById(pageId + '-page');
-  if (target) {
-      target.style.display = 'block';
-      window.scrollTo(0, 0);
-      inicializarSeccionEspecifica(pageId);
-  }
-}
-function getColorPorTipo(tipo) {
-  const t = (tipo || "").toUpperCase();
-  if (t.includes("CAMARA")) return "blue";
-  if (t.includes("TABLERO")) return "green";
-  if (t.includes("SWITCH")) return "purple";
-  if (t.includes("ALARMA")) return "red";
-  if (t.includes("TAREA") || t.includes("MANTENIMIENTO")) return "orange";
-  return "grey"; // Color por defecto
-}
+    function showPage(pageId) {
+      document.querySelectorAll('.page-content').forEach(p => p.style.display = 'none');
+      const target = document.getElementById(pageId + '-page');
+      if (target) {
+        target.style.display = 'block';
+        window.scrollTo(0, 0);
+        inicializarSeccionEspecifica(pageId);
+      }
+    }
+    function getColorPorTipo(tipo) {
+      const t = (tipo || "").toUpperCase();
+      if (t.includes("CAMARA")) return "blue";
+      if (t.includes("TABLERO")) return "green";
+      if (t.includes("SWITCH")) return "purple";
+      if (t.includes("ALARMA")) return "red";
+      if (t.includes("TAREA") || t.includes("MANTENIMIENTO")) return "orange";
+      return "grey"; // Color por defecto
+    }
 
-function irA(pagina, idActivo = null) {
-  const modalElement = document.getElementById('modal-detalle');
-  const modal = M.Modal.getInstance(modalElement);
-  if (modal) modal.close();
+    function irA(pagina, idActivo = null) {
+      const modalElement = document.getElementById('modal-detalle');
+      const modal = M.Modal.getInstance(modalElement);
+      if (modal) modal.close();
 
-  if (idActivo) {
-      const pDestino = document.getElementById(pagina + '-page');
-      if (pDestino) {
+      if (idActivo) {
+        const pDestino = document.getElementById(pagina + '-page');
+        if (pDestino) {
           const input = pDestino.querySelector('.id-activo-comun');
           const label = pDestino.querySelector('.label-activo-comun');
           if (input) input.value = idActivo;
           if (label) label.innerText = idActivo;
+        }
       }
-  }
-  showPage(pagina);
-}
+      showPage(pagina);
+    }
 
-// ==========================================
-// 2. CARGA INICIAL Y PERMISOS
-// ==========================================
-function cargarConfiguracionInicial() {
-  google.script.run
-    .withSuccessHandler(res => {
-        USUARIO_ACTUAL = res;
-        gestionarVisibilidadMenu(USUARIO_ACTUAL);
+    // ==========================================
+    // 2. CARGA INICIAL Y PERMISOS
+    // ==========================================
+    function cargarConfiguracionInicial() {
+      google.script.run
+        .withSuccessHandler(res => {
+          USUARIO_ACTUAL = res;
+          gestionarVisibilidadMenu(USUARIO_ACTUAL);
 
-        if (USUARIO_ACTUAL.rol !== "SIN ACCESO") {
+          if (USUARIO_ACTUAL.rol !== "SIN ACCESO") {
             cargarDataMaestra();
             actualizarBadgeUI();
             setInterval(actualizarBadgeUI, 120000);
             showPage('panel');
-        } else {
+          } else {
             showPage('error-access');
-        }
-    })
-    .obtenerMisPermisos();
-}
+          }
+        })
+        .obtenerMisPermisos();
+    }
 
-function gestionarVisibilidadMenu(user) {
-  const isAdmin = (user.rol === 'ADMIN' || user.rol === 'SECRETARIO');
-  const btnAlta = document.getElementById('btn-seccion-alta');
-  const btnSoli = document.getElementById('btn-ver-solicitudes');
+    function gestionarVisibilidadMenu(user) {
+      const isAdmin = (user.rol === 'ADMIN' || user.rol === 'SECRETARIO');
+      const btnAlta = document.getElementById('btn-seccion-alta');
+      const btnSoli = document.getElementById('btn-ver-solicitudes');
 
-  if (btnAlta) btnAlta.style.display = isAdmin ? 'block' : 'none';
-  if (btnSoli) btnSoli.style.display = isAdmin ? 'block' : 'none';
-}
+      if (btnAlta) btnAlta.style.display = isAdmin ? 'block' : 'none';
+      if (btnSoli) btnSoli.style.display = isAdmin ? 'block' : 'none';
+    }
 
-function actualizarBadgeUI() {
-  google.script.run
-    .withSuccessHandler(count => {
-      const badge = document.getElementById('badge-solicitudes');
-      if (badge) badge.textContent = count || '0';
-    })
-    .actualizarBadgeSolicitudes();
+    function actualizarBadgeUI() {
+      google.script.run
+        .withSuccessHandler(count => {
+          const badge = document.getElementById('badge-solicitudes');
+          if (badge) badge.textContent = count || '0';
+        })
+        .actualizarBadgeSolicitudes();
 
-  google.script.run
-    .withSuccessHandler(count => {
-      const badge = document.getElementById('badge-tareas');
-      if (badge) badge.textContent = count || '0';
-    })
-    .actualizarBadgeTareas();
-}
-
-// Ejecuta al cambiar checkboxes
-document.querySelectorAll('input[id^="chk-estado-"]').forEach(chk => {
-  chk.addEventListener('change', filtrarTabla);
-});
-function cargarDataMaestra() {
-    console.log("⏳ Iniciando carga de base de datos...");
-    google.script.run
+      google.script.run
+        .withSuccessHandler(count => {
+          const badge = document.getElementById('badge-tareas');
+          if (badge) badge.textContent = count || '0';
+        })
+        .actualizarBadgeTareas();
+    }
+DATA_MAESTRA = DATA_MAESTRA.map(item => ({
+  ...item,
+  _index: (
+    (item.ID || '') + ' ' +
+    (item.DIRECCION || '')
+  ).toUpperCase()
+}));
+    // Ejecuta al cambiar checkboxes
+    document.querySelectorAll('input[id^="chk-estado-"]').forEach(chk => {
+      chk.addEventListener('change', filtrarTabla);
+    });
+    function cargarDataMaestra() {
+      console.log("⏳ Iniciando carga de base de datos...");
+      google.script.run
         .withSuccessHandler(res => {
-            if (res && Array.isArray(res)) {
-                DATA_MAESTRA = res;
-                console.log("✅ Datos sincronizados:", DATA_MAESTRA.length);
-                
-                // --- AQUÍ SE LLAMA ---
-                actualizarContadores();
-                inicializarFiltrosCheckbox();  // ✅ Activa los checkboxes de filtro
-                
-                // Refrescar la vista inicial (opcional)
-                ejecutarBusquedaMaestra('TODO', '');
-            }
+          if (res && Array.isArray(res)) {
+            DATA_MAESTRA = res;
+            console.log("✅ Datos sincronizados:", DATA_MAESTRA.length);
+
+            // Actualizar contadores
+            actualizarContadores();
+
+            // Ejecutar búsqueda inicial sin argumentos (mostrará todos si no hay filtro)
+            ejecutarBusquedaMaestra('');
+          } else {
+            console.log("⚠ Respuesta inesperada:", res);
+          }
+        })
+        .withFailureHandler(err => {
+          console.error("❌ Error cargando datos:", err);
+          M.toast({ html: '❌ Error al cargar base de datos', classes: 'red' });
         })
         .buscadorMaestro("", []);
-}
+    }
 
-function cargarCamarasDeTablero(idTablero) {
-  google.script.run
-    .withSuccessHandler(camaras => {
-      const html = camaras.map(cam => `
+    function cargarCamarasDeTablero(idTablero) {
+      google.script.run
+        .withSuccessHandler(camaras => {
+          const html = camaras.map(cam => `
         <div class="collection-item">
           <strong>${cam.idCamara}</strong> (Switch: ${cam.idSwitch})
           <a href="#" onclick="abrirFichaTecnica('${cam.idCamara}', 'CAMARAS')">
@@ -1102,165 +1205,165 @@ function cargarCamarasDeTablero(idTablero) {
           </a>
         </div>
       `).join('');
-      document.getElementById('lista-camaras-tablero').innerHTML = html;
-    })
-    .obtenerCamarasDeTablero(idTablero);
-}
+          document.getElementById('lista-camaras-tablero').innerHTML = html;
+        })
+        .obtenerCamarasDeTablero(idTablero);
+    }
 
-function dibujarFichaTecnica(id, tipo, data) {
-    const contenedor = document.getElementById('contenedor-detalle-ficha');
-    if (!contenedor) return;
+    function dibujarFichaTecnica(id, tipo, data) {
+      const contenedor = document.getElementById('contenedor-detalle-ficha');
+      if (!contenedor) return;
 
-    let html = '<form id="form-edicion-activo">';
-    html += '<ul class="collection with-header shadow-fuerte">';
-    html += '<li class="collection-header blue darken-4 white-text">';
-    html += '<h5 style="margin:0;">' + id + '</h5>';
-    html += '<p style="margin:0; opacity:0.8;">Tipo: ' + tipo + '</p></li>';
+      let html = '<form id="form-edicion-activo">';
+      html += '<ul class="collection with-header shadow-fuerte">';
+      html += '<li class="collection-header blue darken-4 white-text">';
+      html += '<h5 style="margin:0;">' + id + '</h5>';
+      html += '<p style="margin:0; opacity:0.8;">Tipo: ' + tipo + '</p></li>';
 
-    for (const campo in data.detalles) {
+      for (const campo in data.detalles) {
         const valor = data.detalles[campo] || '';
         const campoMayus = campo.toUpperCase();
         const esBloqueado = (campoMayus === 'ID' || campoMayus.includes('FECHA')) ? 'readonly' : '';
-        
+
         html += '<li class="collection-item" style="padding: 10px 20px;">';
 
         if (campoMayus.includes('ESTADO') || campoMayus.includes('PRIORIDAD')) {
-            const opciones = campoMayus.includes('PRIORIDAD') 
-                ? ['ALTA', 'MEDIA', 'BAJA'] 
-                : ['OPERATIVO', 'FUERA DE SERVICIO', 'EN REPARACION', 'PENDIENTE', 'RESUELTA'];
+          const opciones = campoMayus.includes('PRIORIDAD')
+            ? ['ALTA', 'MEDIA', 'BAJA']
+            : ['OPERATIVO', 'FUERA DE SERVICIO', 'EN REPARACION', 'PENDIENTE', 'RESUELTA'];
 
-            html += '<label style="font-size: 0.8rem;">' + campo + '</label>';
-            html += '<select name="' + campo + '" class="browser-default" style="display:block; border:1px solid #ddd; border-radius:4px; padding:5px;">';
-            opciones.forEach(opt => {
-                const selected = (valor.toString().toUpperCase() === opt) ? 'selected' : '';
-                html += '<option value="' + opt + '" ' + selected + '>' + opt + '</option>';
-            });
-            html += '</select>';
+          html += '<label style="font-size: 0.8rem;">' + campo + '</label>';
+          html += '<select name="' + campo + '" class="browser-default" style="display:block; border:1px solid #ddd; border-radius:4px; padding:5px;">';
+          opciones.forEach(opt => {
+            const selected = (valor.toString().toUpperCase() === opt) ? 'selected' : '';
+            html += '<option value="' + opt + '" ' + selected + '>' + opt + '</option>';
+          });
+          html += '</select>';
         } else {
-            html += '<div class="input-field" style="margin:0;">';
-            html += '<input type="text" name="' + campo + '" id="edit-' + campo + '" value="' + valor + '" ' + esBloqueado + ' style="margin-bottom: 5px; height: 2rem;">';
-            html += '<label class="active" for="edit-' + campo + '">' + campo + '</label></div>';
+          html += '<div class="input-field" style="margin:0;">';
+          html += '<input type="text" name="' + campo + '" id="edit-' + campo + '" value="' + valor + '" ' + esBloqueado + ' style="margin-bottom: 5px; height: 2rem;">';
+          html += '<label class="active" for="edit-' + campo + '">' + campo + '</label></div>';
         }
         html += '</li>';
-    }
+      }
 
-    html += '</ul>';
-    html += '<div style="margin-top:20px; display:flex; gap:10px;">';
-    html += '<button type="button" class="btn-large grey lighten-1 waves-effect btn-volver" style="flex:1;">CANCELAR</button>';
-    html += '<button type="submit" class="btn-large green darken-2 waves-effect" style="flex:2;"><i class="material-icons left">save</i> GUARDAR CAMBIOS</button>';
-    html += '</div></form>';
+      html += '</ul>';
+      html += '<div style="margin-top:20px; display:flex; gap:10px;">';
+      html += '<button type="button" class="btn-large grey lighten-1 waves-effect btn-volver" style="flex:1;">CANCELAR</button>';
+      html += '<button type="submit" class="btn-large green darken-2 waves-effect" style="flex:2;"><i class="material-icons left">save</i> GUARDAR CAMBIOS</button>';
+      html += '</div></form>';
 
-    contenedor.innerHTML = html;
+      contenedor.innerHTML = html;
 
-    // RE-VINCULAR BOTÓN VOLVER (Importante porque es dinámico)
-    const btnVolver = contenedor.querySelector('.btn-volver');
-    if(btnVolver) btnVolver.onclick = () => showPage('panel-page');
+      // RE-VINCULAR BOTÓN VOLVER (Importante porque es dinámico)
+      const btnVolver = contenedor.querySelector('.btn-volver');
+      if (btnVolver) btnVolver.onclick = () => showPage('panel-page');
 
-    document.getElementById('form-edicion-activo').onsubmit = function(e) {
+      document.getElementById('form-edicion-activo').onsubmit = function (e) {
         e.preventDefault();
         const formData = new FormData(this);
         const nuevosDatos = {};
         formData.forEach((value, key) => { nuevosDatos[key] = value; });
 
-        M.toast({html: 'Enviando actualización...', classes: 'blue'});
+        M.toast({ html: 'Enviando actualización...', classes: 'blue' });
 
         google.script.run
-            .withSuccessHandler(res => {
-                if (res && res.includes("✅")) {
-                    M.toast({html: res, classes: 'green'});
-                    cargarDataMaestra(); 
-                    showPage('panel-page');
-                } else {
-                    M.toast({html: res || 'Error desconocido', classes: 'red'});
-                }
-            })
-            .editarDatosMaestro(tipo, id, nuevosDatos); 
-    };
-}
+          .withSuccessHandler(res => {
+            if (res && res.includes("✅")) {
+              M.toast({ html: res, classes: 'green' });
+              cargarDataMaestra();
+              showPage('panel-page');
+            } else {
+              M.toast({ html: res || 'Error desconocido', classes: 'red' });
+            }
+          })
+          .editarDatosMaestro(tipo, id, nuevosDatos);
+      };
+    }
 
-// ==========================================
-// 3. BUSCADOR Y DASHBOARD
-// ==========================================
+    // ==========================================
+    // 3. BUSCADOR Y DASHBOARD
+    // ==========================================
 
 
-function ejecutarBusquedaConDelay() {
-    ejecutarBusquedaMaestra();
-}
-let timerBusqueda;
+    function ejecutarBusquedaConDelay() {
+      ejecutarBusquedaMaestra();
+    }
+    let timerBusqueda;
 
-// ALIAS PARA QUE NO SE ROMPA EL ONKEYUP DEL HTML
-function volverAlPanel() {
-  // 1. Ocultar todos los formularios/páginas
-  const paginas = document.querySelectorAll('.page-content');
-  paginas.forEach(p => p.style.display = 'none');
-  // 2. Mostrar el panel principal
-  const panel = document.getElementById('panel-page') || document.getElementById('panel');
-  if (panel) panel.style.display = 'block';
-  // Limpieza extra: vaciar buscador para evitar confusión
-  const inp = document.getElementById('inputMaestro');
-  if (inp) inp.value = "";
-  const lista = document.getElementById('listaResultadosMaestros');
-  if (lista) lista.innerHTML = "";
-  // 3. Si el usuario es técnico, refrescar sus tareas
-  if (USUARIO_ACTUAL.rol === 'TECNICO') {
-      cargarTareasTecnico();
-  }
-  
-  // 4. Si el usuario es admin/secretario, refrescar la data maestra
-  if (USUARIO_ACTUAL.rol === 'ADMIN' || USUARIO_ACTUAL.rol === 'SECRETARIO') {
-      cargarDataMaestra();
-  }
-  // 5. Cerrar cualquier modal que haya quedado abierto
-  const modales = document.querySelectorAll('.modal');
-  modales.forEach(m => {
-      const instance = M.Modal.getInstance(m);
-      if (instance) instance.close();
-  });
-}
+    // ALIAS PARA QUE NO SE ROMPA EL ONKEYUP DEL HTML
+    function volverAlPanel() {
+      // 1. Ocultar todos los formularios/páginas
+      const paginas = document.querySelectorAll('.page-content');
+      paginas.forEach(p => p.style.display = 'none');
+      // 2. Mostrar el panel principal
+      const panel = document.getElementById('panel-page') || document.getElementById('panel');
+      if (panel) panel.style.display = 'block';
+      // Limpieza extra: vaciar buscador para evitar confusión
+      const inp = document.getElementById('inputMaestro');
+      if (inp) inp.value = "";
+      const lista = document.getElementById('listaResultadosMaestros');
+      if (lista) lista.innerHTML = "";
+      // 3. Si el usuario es técnico, refrescar sus tareas
+      if (USUARIO_ACTUAL.rol === 'TECNICO') {
+        cargarTareasTecnico();
+      }
 
-function limpiarBuscador() {
-  const input = document.getElementById('inputMaestro');
-  const lista = document.getElementById('listaResultadosMaestros');
-  const btnX = document.getElementById('btnLimpiarBusqueda');
-  
-  input.value = "";           // Limpia el texto
-  lista.innerHTML = "";       // Limpia los resultados
-  btnX.style.display = "none"; // Oculta la X
-  input.focus();              // Devuelve el foco al input
-}
+      // 4. Si el usuario es admin/secretario, refrescar la data maestra
+      if (USUARIO_ACTUAL.rol === 'ADMIN' || USUARIO_ACTUAL.rol === 'SECRETARIO') {
+        cargarDataMaestra();
+      }
+      // 5. Cerrar cualquier modal que haya quedado abierto
+      const modales = document.querySelectorAll('.modal');
+      modales.forEach(m => {
+        const instance = M.Modal.getInstance(m);
+        if (instance) instance.close();
+      });
+    }
 
-function obtenerIcono(tipo) {
-  const icons = { 
-      'CAMARAS': 'videocam', 
-      'ALARMAS': 'notifications', 
-      'SWITCHES': 'router',
-      'TABLEROS': 'settings_input_component',
-      'TAREAS': 'assignment'
-  };
-  return icons[tipo.toUpperCase()] || 'settings';
-}
+    function limpiarBuscador() {
+      const input = document.getElementById('input-busqueda-maestra');
+      const lista = document.getElementById('lista-resultados-maestros');
+      const btnX = document.getElementById('btnLimpiarBusqueda');
 
-function renderIconoEtapa(id, etapa, estado) {
-    let icono = "hourglass_empty", clase = "status-waiting", funcionClick = "";
-    if (["OK", "CONECTADA", "AUTORIZADA"].includes(estado)) {
+      if (input) input.value = "";           // Limpia el texto
+      if (lista) lista.innerHTML = "";       // Limpia los resultados
+      if (btnX) btnX.style.display = "none"; // Oculta la X
+      if (input) input.focus();              // Devuelve el foco al input
+    }
+
+    function obtenerIcono(tipo) {
+      const icons = {
+        'CAMARAS': 'videocam',
+        'ALARMAS': 'notifications',
+        'SWITCHES': 'router',
+        'TABLEROS': 'settings_input_component',
+        'TAREAS': 'assignment'
+      };
+      return icons[tipo.toUpperCase()] || 'settings';
+    }
+
+    function renderIconoEtapa(id, etapa, estado) {
+      let icono = "hourglass_empty", clase = "status-waiting", funcionClick = "";
+      if (["OK", "CONECTADA", "AUTORIZADA"].includes(estado)) {
         icono = "check_circle"; clase = "status-done";
-    } else if (["PENDIENTE", "PEDIDO", "SOLICITADA"].includes(estado)) {
+      } else if (["PENDIENTE", "PEDIDO", "SOLICITADA"].includes(estado)) {
         icono = (etapa === 'ENERGIA') ? "bolt" : "priority_high";
         clase = "status-pending";
         if (etapa === 'ENERGIA') funcionClick = `onclick="abrirFormularioEnergia('${id}')"`;
         else if (etapa === 'AUTORIZACION' && (USUARIO_ACTUAL.rol === 'ADMIN' || USUARIO_ACTUAL.rol === 'SECRETARIO')) {
-            funcionClick = `onclick="showPage('solicitudes')"`;
+          funcionClick = `onclick="showPage('solicitudes')"`;
         }
+      }
+      return `<div class="status-blob ${clase}" ${funcionClick}><i class="material-icons">${icono}</i></div>`;
     }
-    return `<div class="status-blob ${clase}" ${funcionClick}><i class="material-icons">${icono}</i></div>`;
-}
 
-function cargarDashboardSeguimiento() {
-    google.script.run
+    function cargarDashboardSeguimiento() {
+      google.script.run
         .withSuccessHandler(datos => {
-            const body = document.getElementById('body-dashboard');
-            if (!body) return;
-            body.innerHTML = datos.map(item => `
+          const body = document.getElementById('body-dashboard');
+          if (!body) return;
+          body.innerHTML = datos.map(item => `
                 <tr>
                     <td><b>${item.id}</b><br><small>${item.direccion}</small></td>
                     <td>${renderIconoEtapa(item.id, 'AUTORIZACION', item.autorizado)}</td>
@@ -1272,18 +1375,25 @@ function cargarDashboardSeguimiento() {
             `).join('');
         })
         .obtenerDashboardSeguimiento();
+    }
+
+    function escaparHTML(texto){
+  return texto
+   .replace(/&/g,"&amp;")
+   .replace(/</g,"&lt;")
+   .replace(/>/g,"&gt;");
 }
 
-function abrirFichaTecnica(id, tipo) {
-    // 1. Cerrar modal si estuviera abierto
-    const modal = M.Modal.getInstance(document.getElementById('modal-detalle'));
-    if (modal) modal.close();
+    function abrirFichaTecnica(id, tipo) {
+      // 1. Cerrar modal si estuviera abierto
+      const modal = M.Modal.getInstance(document.getElementById('modal-detalle'));
+      if (modal) modal.close();
 
-    // 2. Ir a la página de detalle
-    showPage('detalle-activo-page'); 
-    
-    const contenedor = document.getElementById('contenedor-detalle-ficha');
-    contenedor.innerHTML = `
+      // 2. Ir a la página de detalle
+      showPage('detalle-activo-page');
+
+      const contenedor = document.getElementById('contenedor-detalle-ficha');
+      contenedor.innerHTML = `
         <div class="center" style="padding:40px;">
             <div class="preloader-wrapper small active">
                 <div class="spinner-layer spinner-blue-only">
@@ -1293,187 +1403,196 @@ function abrirFichaTecnica(id, tipo) {
             <p class="grey-text">Cargando datos de ${id}...</p>
         </div>`;
 
-    google.script.run
+      google.script.run
         .withSuccessHandler(res => {
           console.log("Respuesta del servidor:", res); // <-- AQUÍ
-            if (res.success) {
-                dibujarFichaTecnica(id, tipo, res.data);
-            } else {
-                console.error("Error lógico:", res.message);
-                M.toast({html: 'Error: ' + res.message, classes: 'red'});
-                showPage('panel-page'); // Volver si falla
-            }
+          if (res.success) {
+            dibujarFichaTecnica(id, tipo, res.data);
+          } else {
+            console.error("Error lógico:", res.message);
+            M.toast({ html: 'Error: ' + res.message, classes: 'red' });
+            showPage('panel-page'); // Volver si falla
+          }
         })
         .withFailureHandler(err => {
-            M.toast({html: 'Error de conexión', classes: 'red'});
+          M.toast({ html: 'Error de conexión', classes: 'red' });
         })
         .obtenerDetalleActivo(id, tipo);
-}
+    }
 
-function abrirMantenimientoTecnico(id) {
-  // 1. Cerramos el modal de acciones para que no estorbe
-  const modal = M.Modal.getInstance(document.getElementById('modal-detalle'));
-  if (modal) modal.close();
+    function abrirMantenimientoTecnico(id) {
+      // 1. Cerramos primero el modal de acciones
+      const modalElement = document.getElementById('modal-detalle');
+      if (modalElement) {
+        const modal = M.Modal.getInstance(modalElement);
+        if (modal) modal.close();
+      }
 
-  // 2. Cambiamos a la página del formulario usando tu ID de HTML
-  showPage('mantenimiento-checklist-page'); 
-  
-  // 3. Buscamos el nombre para mostrarlo arriba
-  const activo = DATA_MAESTRA.find(a => a.ID === id);
-  const nombre = activo ? (activo.DIRECCION || "Sin dirección") : "";
-  document.getElementById('maint-info-activo').innerHTML = `<b>ID:</b> ${id} <br> <b>Ubicación:</b> ${nombre}`;
+      // 2. Esperamos un momento para que se cierre el modal antes de cambiar página
+      setTimeout(() => {
+        // 3. Cambiamos a la página del formulario
+        showPage('mantenimiento-checklist-page');
 
-  // 4. Seteamos el ID en el campo oculto y reseteamos checkboxes
-  const campoId = document.getElementById('maint-id');
-  const form = document.getElementById('form-mantenimiento');
-  
-  if (form) form.reset();
-  if (campoId) campoId.value = id;
-  
-  M.updateTextFields(); 
-  M.toast({html: 'Iniciando mantenimiento sitio: ' + id});
-}
+        // 4. Buscamos el nombre para mostrarlo arriba
+        const activo = DATA_MAESTRA.find(a => a.ID === id);
+        const nombre = activo ? (activo.DIRECCION || "Sin dirección") : "";
+        const infoDiv = document.getElementById('maint-info-activo');
+        if (infoDiv) {
+          infoDiv.innerHTML = `<b>ID:</b> ${id} <br> <b>Ubicación:</b> ${nombre}`;
+        }
 
-// ==========================================
-// 4. FUNCIONES DE ENVÍO Y FORMULARIOS
-// ==========================================
-function obtenerGPS() {
-    const status = document.getElementById('ubicacionStatus');
-    if (!status) return;
-    status.innerHTML = "Buscando satélites...";
-    status.style.color = "orange";
-    if (!navigator.geolocation) { status.innerHTML = "No soportado"; return; }
+        // 5. Seteamos el ID en el campo oculto y reseteamos checkboxes
+        const campoId = document.getElementById('maint-id');
+        const form = document.getElementById('form-mantenimiento');
 
-    navigator.geolocation.getCurrentPosition(
+        if (form) form.reset();
+        if (campoId) campoId.value = id;
+
+        M.updateTextFields();
+        M.toast({ html: 'Iniciando mantenimiento en sitio: ' + id, classes: 'green' });
+      }, 300);
+    }
+
+    // ==========================================
+    // 4. FUNCIONES DE ENVÍO Y FORMULARIOS
+    // ==========================================
+    function obtenerGPS() {
+      const status = document.getElementById('ubicacionStatus');
+      if (!status) return;
+      status.innerHTML = "Buscando satélites...";
+      status.style.color = "orange";
+      if (!navigator.geolocation) { status.innerHTML = "No soportado"; return; }
+
+      navigator.geolocation.getCurrentPosition(
         (pos) => {
-            document.getElementById('instalacionLatitud').value = pos.coords.latitude.toFixed(6);
-            document.getElementById('instalacionLongitud').value = pos.coords.longitude.toFixed(6);
-            M.updateTextFields();
-            status.innerHTML = "✅ Ubicación obtenida.";
-            status.style.color = "green";
+          document.getElementById('instalacionLatitud').value = pos.coords.latitude.toFixed(6);
+          document.getElementById('instalacionLongitud').value = pos.coords.longitude.toFixed(6);
+          M.updateTextFields();
+          status.innerHTML = "✅ Ubicación obtenida.";
+          status.style.color = "green";
         },
         (err) => { status.innerHTML = "❌ Error: " + err.message; status.style.color = "red"; },
         { enableHighAccuracy: true, timeout: 10000 }
-    );
-}
-
-function enviarAltaNueva() {
-  const btn = document.querySelector('#form-nuevo-tablero button[type="submit"]');
-  const data = {
-      tipoActivo: document.getElementById('tipoActivo').value,
-      nombre: document.getElementById('direccion').value.trim(),
-      latitud: document.getElementById('instalacionLatitud').value,
-      longitud: document.getElementById('instalacionLongitud').value,
-      observaciones: document.getElementById('observaciones').value.trim()
-  };
-
-  // Validación estricta
-  if (!data.tipoActivo || data.nombre.length < 5) {
-      M.toast({ html: '❌ Error: La dirección es demasiado corta o falta el tipo.', classes: 'red' });
-      return;
-  }
-
-  if (!data.latitud || !data.longitud) {
-      if (!confirm("No se obtuvo GPS. ¿Desea enviar la solicitud sin coordenadas?")) return;
-  }
-
-  btn.disabled = true;
-
-  google.script.run
-    .withSuccessHandler(res => {
-      btn.disabled = false;
-    if (res.success) {
-      M.toast({ html: '✅ ' + res.message, classes: 'green' });
-      document.getElementById('form-nuevo-tablero').reset();
-      showPage('panel');
-      actualizarBadgeUI();
-      } else { M.toast({ html: '❌ ' + res.message, classes: 'red' }); }
-    })
-    .procesarSolicitudUnificada(data);
-}
-
-function toggleRedCampos(valor) {
-    const div = document.getElementById('campos-red-detalle');
-    div.style.display = (valor === 'CONECTADA') ? 'block' : 'none';
-}
-
-// Función para mostrar/ocultar insumos según el estado
-function toggleInsumos(valor) {
-    const seccion = document.getElementById('seccion-insumos');
-    if (valor === 'ENERGIZADA') {
-        seccion.style.display = 'block';
-    } else {
-        seccion.style.display = 'none';
+      );
     }
-}
 
-function guardarEnergia() {
-    const btn = event.currentTarget; // Captura el botón presionado
-    const estado = document.getElementById('energia-estado').value;
-    
-    // 1. Validaciones básicas
-    const obs = document.getElementById('obsFinalesEnergia').value;
-    if (estado === 'ENERGIZADA' && !obs) {
-        M.toast({html: '❌ Por favor, agregue observaciones', classes: 'red'});
+    function enviarAltaNueva() {
+      const btn = document.querySelector('#form-nuevo-tablero button[type="submit"]');
+      const data = {
+        tipoActivo: document.getElementById('tipoActivo').value,
+        nombre: document.getElementById('direccion').value.trim(),
+        latitud: document.getElementById('instalacionLatitud').value,
+        longitud: document.getElementById('instalacionLongitud').value,
+        observaciones: document.getElementById('observaciones').value.trim()
+      };
+
+      // Validación estricta
+      if (!data.tipoActivo || data.nombre.length < 5) {
+        M.toast({ html: '❌ Error: La dirección es demasiado corta o falta el tipo.', classes: 'red' });
         return;
+      }
+
+      if (!data.latitud || !data.longitud) {
+        if (!confirm("No se obtuvo GPS. ¿Desea enviar la solicitud sin coordenadas?")) return;
+      }
+
+      btn.disabled = true;
+
+      google.script.run
+        .withSuccessHandler(res => {
+          btn.disabled = false;
+          if (res.success) {
+            M.toast({ html: '✅ ' + res.message, classes: 'green' });
+            document.getElementById('form-nuevo-tablero').reset();
+            showPage('panel');
+            actualizarBadgeUI();
+          } else { M.toast({ html: '❌ ' + res.message, classes: 'red' }); }
+        })
+        .procesarSolicitudUnificada(data);
     }
 
-    // 2. Bloqueo del botón y Cartel de Cargando
-    btn.disabled = true;
-    const toastCargando = M.toast({html: '<span><i class="material-icons left">sync</i> Guardando en Servidor...</span>', displayLength: 10000});
+    function toggleRedCampos(valor) {
+      const div = document.getElementById('campos-red-detalle');
+      div.style.display = (valor === 'CONECTADA') ? 'block' : 'none';
+    }
 
-    const data = {
+    // Función para mostrar/ocultar insumos según el estado
+    function toggleInsumos(valor) {
+      const seccion = document.getElementById('seccion-insumos');
+      if (valor === 'ENERGIZADA') {
+        seccion.style.display = 'block';
+      } else {
+        seccion.style.display = 'none';
+      }
+    }
+
+    function guardarEnergia() {
+      const btn = event.currentTarget; // Captura el botón presionado
+      const estado = document.getElementById('energia-estado').value;
+
+      // 1. Validaciones básicas
+      const obs = document.getElementById('obsFinalesEnergia').value;
+      if (estado === 'ENERGIZADA' && !obs) {
+        M.toast({ html: '❌ Por favor, agregue observaciones', classes: 'red' });
+        return;
+      }
+
+      // 2. Bloqueo del botón y Cartel de Cargando
+      btn.disabled = true;
+      const toastCargando = M.toast({ html: '<span><i class="material-icons left">sync</i> Guardando en Servidor...</span>', displayLength: 10000 });
+
+      const data = {
         id: document.getElementById('energia-id-oculto').value,
         tipoAccion: 'ACTUALIZAR_ENERGIA',
         estado: estado,
         proveedor: document.getElementById('energia-proveedor').value,
         observaciones: obs,
         insumos: {
-            camaras: document.getElementById('insumoCamaras').value || 0,
-            switches: document.getElementById('insumoSwitches').value || 0,
-            fuentes: document.getElementById('insumoFuentes').value || 0,
-            cajas: document.getElementById('insumoCajas').value || 0
+          camaras: document.getElementById('insumoCamaras').value || 0,
+          switches: document.getElementById('insumoSwitches').value || 0,
+          fuentes: document.getElementById('insumoFuentes').value || 0,
+          cajas: document.getElementById('insumoCajas').value || 0
         }
-    };
+      };
 
-    google.script.run
-      .withSuccessHandler(res => {
+      google.script.run
+        .withSuccessHandler(res => {
           toastCargando.dismiss(); // Quitar el cartel de cargando
           if (res.success) {
-              M.toast({html: '✅ Guardado con éxito', classes: 'green'});
-              showPage('panel');
-              cargarDataMaestra(); // Refresca tu buscador
+            M.toast({ html: '✅ Guardado con éxito', classes: 'green' });
+            showPage('panel');
+            cargarDataMaestra(); // Refresca tu buscador
           } else {
-              M.toast({html: '❌ Error: ' + res.message, classes: 'red'});
-              btn.disabled = false; // Rehabilitar si falló
+            M.toast({ html: '❌ Error: ' + res.message, classes: 'red' });
+            btn.disabled = false; // Rehabilitar si falló
           }
-      })
-      .withFailureHandler(err => {
+        })
+        .withFailureHandler(err => {
           toastCargando.dismiss();
-          M.toast({html: '❌ Error de conexión', classes: 'red'});
+          M.toast({ html: '❌ Error de conexión', classes: 'red' });
           btn.disabled = false;
-      })
-      .procesarSolicitudUnificada(data);
-}
+        })
+        .procesarSolicitudUnificada(data);
+    }
 
-/** 1. Cargar la lista de tareas asignadas al técnico */
-function cargarTareasTecnico() {
-  const contenedor = document.getElementById('contenedor-tareas-cards');
-  contenedor.innerHTML = '<div class="center" style="padding:20px;"><div class="preloader-wrapper small active"><div class="spinner-layer spinner-blue-only"><div class="circle-clipper left"><div class="circle"></div></div></div></div><p>Cargando tareas...</p></div>';
+    /** 1. Cargar la lista de tareas asignadas al técnico */
+    function cargarTareasTecnico() {
+      const contenedor = document.getElementById('contenedor-tareas-cards');
+      contenedor.innerHTML = '<div class="center" style="padding:20px;"><div class="preloader-wrapper small active"><div class="spinner-layer spinner-blue-only"><div class="circle-clipper left"><div class="circle"></div></div></div></div><p>Cargando tareas...</p></div>';
 
-  google.script.run
-    .withSuccessHandler(tareas => {
-      if (!tareas || tareas.length === 0) {
-          contenedor.innerHTML = `
+      google.script.run
+        .withSuccessHandler(tareas => {
+          if (!tareas || tareas.length === 0) {
+            contenedor.innerHTML = `
               <div class="col s12 center-align" style="padding:40px;">
                   <i class="material-icons large grey-text text-lighten-2">assignment_turned_in</i>
                   <p class="grey-text">No tienes tareas pendientes de instalación.</p>
               </div>`;
-          return;
-      }
-      contenedor.innerHTML = tareas.map(t => {
-        const colorIcon = getColorPorTipo(t.tipo); 
-        return `
+            return;
+          }
+          contenedor.innerHTML = tareas.map(t => {
+            const colorIcon = getColorPorTipo(t.tipo);
+            return `
         <div class="col s12 m6">
           <div class="card hoverable border-left-${colorIcon}">
             <div class="card-content" style="padding: 15px;">
@@ -1485,184 +1604,194 @@ function cargarTareasTecnico() {
             </div>
           </div>
         </div>`;
-      }).join('');
-    })
-    .obtenerMisTareasAsignadas(); 
-}
-
-/** 2. Preparar el formulario antes de mostrarlo */
-function prepararFinalizacion(idTarea, tipo, direccion) {
-  // Seteamos los campos (Asegúrate que estos IDs existan en tu HTML)
-  document.getElementById('idTareaHidden').value = idTarea;
-  document.getElementById('tipoActivoHidden').value = tipo;
-  document.getElementById('direccionFinal').value = direccion;
-  
-  // Limpiamos campos de entrada
-  document.getElementById('idDefinitivo').value = '';
-  document.getElementById('ipInstalacion').value = '';
-  if(document.getElementById('obsFinales')) document.getElementById('obsFinales').value = '';
-  obtenerGPS('final');
-  showPage('finalizar-instalacion');
-  
-  setTimeout(() => { M.updateTextFields(); }, 200);
-}
-
-/** 3. Enviar la finalización al servidor */
-function enviarFinalizacionInstalacion() {
-  const btn = event.currentTarget; // El botón presionado
-  
-  const datosFinales = {
-      tipoAccion: 'FINALIZAR_INSTALACION',
-      idTarea: document.getElementById('idTareaHidden').value,
-      tipoActivo: document.getElementById('tipoActivoHidden').value,
-      idDefinitivo: document.getElementById('idDefinitivo').value.toUpperCase().trim(),
-      direccion: document.getElementById('direccionFinal').value.trim(),
-      ip: document.getElementById('ipInstalacion').value.trim(),
-      latitud: document.getElementById('latFinal').value,
-      longitud: document.getElementById('lngFinal').value,
-      observaciones: document.getElementById('obsFinales')?.value || "Instalación finalizada vía App Técnica."
-  };
-  // Validación
-  if (!datosFinales.idDefinitivo || !datosFinales.ip) {
-      M.toast({html: '❌ ID e IP son obligatorios', classes: 'red'});
-      return;
-  }
-  btn.disabled = true;
-  const loadToast = M.toast({html: 'Enviando y cerrando ticket...', displayLength: 10000});
-  google.script.run
-    .withSuccessHandler(res => {
-      loadToast.dismiss();
-      btn.disabled = false;
-      if (res.success) {
-          M.toast({ html: '✅ ' + res.message, classes: 'green' });
-          showPage('panel');
-          cargarTareasTecnico(); // Refresca la lista
-      } else {
-          // Si falla por IP duplicada u otro error controlado
-          Swal.fire({
-            title: 'Atención',
-            text: res.message,
-            icon: 'warning',
-            confirmButtonColor: '#2e7d32'
-          });
-      }
-  })
-  .withFailureHandler(err => {
-      loadToast.dismiss();
-      btn.disabled = false;
-      M.toast({html: '❌ Error crítico de conexión', classes: 'red'});
-  })
-  .procesarSolicitudUnificada(datosFinales);
-}
-// --- FUNCIONES DE APOYO ---
-function mostrarAyudaIP() {
-    const prov = document.getElementById('final-proveedor').value;
-    const ayuda = SEGMENTOS_IP[prov] || "";
-    const elemAyuda = document.getElementById('ayuda-ip-texto');
-    
-    if(elemAyuda) {
-        elemAyuda.innerText = ayuda ? "Sugerencia: " + ayuda : "";
+          }).join('');
+        })
+        .obtenerMisTareasAsignadas();
     }
-}
 
-function guardarRed() {
-    const btn = event.currentTarget;
-    btn.disabled = true;
-    const toastCargando = M.toast({html: '<span><i class="material-icons left">cloud_upload</i> Actualizando Red...</span>', displayLength: 10000});
+    /** 2. Preparar el formulario antes de mostrarlo */
+    function prepararFinalizacion(idTarea, tipo, direccion) {
+      // Seteamos los campos (Asegúrate que estos IDs existan en tu HTML)
+      document.getElementById('idTareaHidden').value = idTarea;
+      document.getElementById('tipoActivoHidden').value = tipo;
+      document.getElementById('direccionFinal').value = direccion;
 
-    const data = {
+      // Limpiamos campos de entrada
+      document.getElementById('idDefinitivo').value = '';
+      document.getElementById('ipInstalacion').value = '';
+      if (document.getElementById('obsFinales')) document.getElementById('obsFinales').value = '';
+      obtenerGPS('final');
+      showPage('finalizar-instalacion');
+
+      setTimeout(() => { M.updateTextFields(); }, 200);
+    }
+
+    /** 3. Enviar la finalización al servidor */
+    function enviarFinalizacionInstalacion() {
+      const btn = event.currentTarget; // El botón presionado
+
+      const datosFinales = {
+        tipoAccion: 'FINALIZAR_INSTALACION',
+        idTarea: document.getElementById('idTareaHidden').value,
+        tipoActivo: document.getElementById('tipoActivoHidden').value,
+        idDefinitivo: document.getElementById('idDefinitivo').value.toUpperCase().trim(),
+        direccion: document.getElementById('direccionFinal').value.trim(),
+        ip: document.getElementById('ipInstalacion').value.trim(),
+        latitud: document.getElementById('latFinal').value,
+        longitud: document.getElementById('lngFinal').value,
+        observaciones: document.getElementById('obsFinales')?.value || "Instalación finalizada vía App Técnica."
+      };
+      // Validación
+      if (!datosFinales.idDefinitivo || !datosFinales.ip) {
+        M.toast({ html: '❌ ID e IP son obligatorios', classes: 'red' });
+        return;
+      }
+      btn.disabled = true;
+      const loadToast = M.toast({ html: 'Enviando y cerrando ticket...', displayLength: 10000 });
+      google.script.run
+        .withSuccessHandler(res => {
+          loadToast.dismiss();
+          btn.disabled = false;
+          if (res.success) {
+            M.toast({ html: '✅ ' + res.message, classes: 'green' });
+            showPage('panel');
+            cargarTareasTecnico(); // Refresca la lista
+          } else {
+            // Si falla por IP duplicada u otro error controlado
+            Swal.fire({
+              title: 'Atención',
+              text: res.message,
+              icon: 'warning',
+              confirmButtonColor: '#2e7d32'
+            });
+          }
+        })
+        .withFailureHandler(err => {
+          loadToast.dismiss();
+          btn.disabled = false;
+          M.toast({ html: '❌ Error crítico de conexión', classes: 'red' });
+        })
+        .procesarSolicitudUnificada(datosFinales);
+    }
+    // --- FUNCIONES DE APOYO ---
+    function mostrarAyudaIP() {
+      const prov = document.getElementById('final-proveedor').value;
+      const ayuda = SEGMENTOS_IP[prov] || "";
+      const elemAyuda = document.getElementById('ayuda-ip-texto');
+
+      if (elemAyuda) {
+        elemAyuda.innerText = ayuda ? "Sugerencia: " + ayuda : "";
+      }
+    }
+
+    function guardarRed() {
+      const btn = event.currentTarget;
+      btn.disabled = true;
+      const toastCargando = M.toast({ html: '<span><i class="material-icons left">cloud_upload</i> Actualizando Red...</span>', displayLength: 10000 });
+
+      const data = {
         id: document.getElementById('red-id-oculto').value,
         tipoAccion: 'ACTUALIZAR_RED',
         estado: document.getElementById('red-estado').value,
         proveedor: document.getElementById('red-proveedor').value,
         tipoVinculo: document.getElementById('red-tipo').value
-    };
+      };
 
-    google.script.run
+      google.script.run
         .withSuccessHandler(res => {
-            toastCargando.dismiss();
-            if (res.success) {
-                M.toast({html: '✅ Conectividad actualizada', classes: 'blue'});
-                showPage('panel');
-                cargarDataMaestra();
-            }
+          toastCargando.dismiss();
+          if (res.success) {
+            M.toast({ html: '✅ Conectividad actualizada', classes: 'blue' });
+            showPage('panel');
+            cargarDataMaestra();
+          }
         })
         .withFailureHandler(() => {
-            toastCargando.dismiss();
-            btn.disabled = false;
+          toastCargando.dismiss();
+          btn.disabled = false;
         })
         .procesarSolicitudUnificada(data);
-}
+    }
 
-function ejecutarEnvioGenerico(data, formElement) {
-    const btn = formElement.querySelector('button[type="submit"]');
-    btn.disabled = true;
-    google.script.run
+    function ejecutarEnvioGenerico(data, formElement) {
+      const btn = formElement.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      google.script.run
         .withSuccessHandler(res => {
-            btn.disabled = false;
-            if (res.success) {
-                M.toast({ html: '✅ Éxito', classes: 'green' });
-                formElement.reset();
-                showPage('panel');
-                cargarDataMaestra();
-            } else { M.toast({ html: '❌ Error: ' + res.message, classes: 'red' }); }
+          btn.disabled = false;
+          if (res.success) {
+            M.toast({ html: '✅ Éxito', classes: 'green' });
+            formElement.reset();
+            showPage('panel');
+            cargarDataMaestra();
+          } else { M.toast({ html: '❌ Error: ' + res.message, classes: 'red' }); }
         })
         .procesarSolicitudUnificada(data);
-}
+    }
 
-// ==========================================
-// 5. GESTIÓN DE TAREAS Y SOLICITUDES
-// ==========================================
-  function abrirAccionesActivo(id, tipo) {
-    const modalElement = document.getElementById('modal-detalle');
-    if (!modalElement) return;
-    const modal = M.Modal.getInstance(modalElement);
+    // ==========================================
+    // 5. GESTIÓN DE TAREAS Y SOLICITUDES
+    // ==========================================
+    function abrirAccionesActivo(id, tipo) {
+      const modalElement = document.getElementById('modal-detalle');
+      if (!modalElement) return;
+      const modal = M.Modal.getInstance(modalElement);
 
-    // Buscamos el activo en la base de datos local (DATA_MAESTRA)
-    const activo = DATA_MAESTRA.find(a => a.ID === id);
-    const nombre = activo ? (activo.DIRECCION || activo.NOMBRE || "Sin Nombre") : "Cargando...";
+      // Buscamos el activo en la base de datos local (DATA_MAESTRA)
+      const activo = DATA_MAESTRA.find(a => a.ID === id);
+      const nombre = activo ? (activo.DIRECCION || activo.NOMBRE || "Sin Nombre") : "Cargando...";
 
-    const titulo = document.getElementById('detalle-titulo');
-    // Ahora el H4 mostrará: "CAMARAS: ID-101 | CALLE 20 Y 25"
-    if (titulo) titulo.innerHTML = `<small class="grey-text">${tipo}: ${id}</small><br>${nombre}`;
+      const titulo = document.getElementById('detalle-titulo');
+      // Ahora el H4 mostrará: "CAMARAS: ID-101 | CALLE 20 Y 25"
+      if (titulo) titulo.innerHTML = `<small class="grey-text">${tipo}: ${id}</small><br>${nombre}`;
 
-    let htmlBotones = `<div style="display: flex; flex-direction: column; gap: 10px;">`;
+      let htmlBotones = `<div style="display: flex; flex-direction: column; gap: 12px; max-width:400px;">
+        <p style="margin:0 0 5px 0; font-weight:bold; font-size:0.95rem; color:#424242;">Seleccione una acción:</p>`;
 
-    // --- VISTA PARA TÉCNICOS / ADMIN ---
-    if (USUARIO_ACTUAL.rol === 'TECNICO' || USUARIO_ACTUAL.rol === 'ADMIN') {
+      // --- VISTA PARA TÉCNICOS / ADMIN ---
+      if (['TECNICO', 'ADMIN'].includes(USUARIO_ACTUAL.rol)) {
         htmlBotones += `
             <button class="btn blue" onclick="irA('verificar-energia', '${id}')">
-                <i class="material-icons left">bolt</i> 1. Energía e Insumos
+                <i class="material-icons left">bolt</i> Energía e Insumos
             </button>
             <button class="btn cyan darken-2" onclick="abrirMantenimientoTecnico('${id}')">
-                <i class="material-icons left">build</i> 2. Mantenimiento en Sitio
+                <i class="material-icons left">build</i> Mantenimiento en Sitio
             </button>
             <button class="btn purple" onclick="prepararReemplazo('${id}')">
-                <i class="material-icons left">cached</i> 3. Reemplazo de Equipo
+                <i class="material-icons left">cached</i> Reemplazo de Equipo
             </button>
         `;
-    }
+      }
 
-    // --- VISTA PARA EL COM / ADMIN ---
-    if (USUARIO_ACTUAL.rol === 'COM' || USUARIO_ACTUAL.rol === 'ADMIN') {
+      // --- VISTA PARA EL COM / ADMIN / SECRETARIO ---
+      if (['COM', 'ADMIN', 'SECRETARIO'].includes(USUARIO_ACTUAL.rol)) {
         htmlBotones += `
             <button class="btn green darken-2" onclick="reportarFallaCOM('${id}', 'PODA')">
-                <i class="material-icons left">park</i> Solicitar Poda (Espacios Verdes)
+                <i class="material-icons left">park</i> Solicitar Poda
             </button>
             <button class="btn brown lighten-1" onclick="reportarFallaCOM('${id}', 'LIMPIEZA')">
-                <i class="material-icons left">cleaning_services</i> Solicitar Limpieza (Instalador)
+                <i class="material-icons left">cleaning_services</i> Solicitar Limpieza
             </button>
             <button class="btn amber darken-3" onclick="reportarFallaCOM('${id}', 'MOVIMIENTO')">
-                <i class="material-icons left">place</i> Solicitar Movida (Instalador)
+                <i class="material-icons left">place</i> Apuntar
             </button>
             <button class="btn red accent-4" onclick="reportarFallaCOM('${id}', 'DESENFOQUE')">
-                <i class="material-icons left">blur_on</i> Reportar Desenfoque (Técnico)
+                <i class="material-icons left">blur_on</i> Reportar Desenfoque
             </button>
         `;
-    }
+      }
 
-    // --- BOTÓN COMÚN ---
-    htmlBotones += `
+      // --- ACCIÓN EXTRA SECRETARIO/ADMIN ---
+      if (['SECRETARIO', 'ADMIN'].includes(USUARIO_ACTUAL.rol)) {
+        htmlBotones += `
+            <button class="btn teal darken-1" onclick="reportarFallaSEC('${id}')">
+                <i class="material-icons left">report_problem</i> Reporte interno
+            </button>
+        `;
+      }
+
+      // --- BOTÓN COMÚN finales ---
+      htmlBotones += `
     </div>`;
 
     const contenedor = document.getElementById('contenedor-botones-accion');
@@ -1670,155 +1799,194 @@ function ejecutarEnvioGenerico(data, formElement) {
 
     modal.open();
   }
-// --- FUNCIONES TÉCNICAS ---
-function prepararReemplazo(idUbicacion) {
-  const idNuevo = prompt(`Sustitución para ${idUbicacion}.\nIngrese el ID del nuevo hardware (Ej: CAM-SN-123 o CAM-L-001):`);
-  
-  if (idNuevo) {
-      // Validación básica: que no sea igual al que ya está
-      if(idNuevo.toUpperCase() === idUbicacion.toUpperCase()){
-          M.toast({html: '❌ El ID nuevo no puede ser igual al actual', classes: 'red'});
-          return;
-      }
+    // --- FUNCIONES TÉCNICAS ---
+    function prepararReemplazo(idUbicacion) {
+      const idNuevo = prompt(`Sustitución para ${idUbicacion}.\nIngrese el ID del nuevo hardware (Ej: CAM-SN-123 o CAM-L-001):`);
 
-      M.toast({html: 'Procesando enroque...', classes: 'purple'});
-      
-      const data = {
+      if (idNuevo) {
+        // Validación básica: que no sea igual al que ya está
+        if (idNuevo.toUpperCase() === idUbicacion.toUpperCase()) {
+          M.toast({ html: '❌ El ID nuevo no puede ser igual al actual', classes: 'red' });
+          return;
+        }
+
+        M.toast({ html: 'Procesando enroque...', classes: 'purple' });
+
+        const data = {
           idUbicacion: idUbicacion,
           idNuevoHardware: idNuevo.toUpperCase()
-      };
+        };
 
-      google.script.run
+        google.script.run
           .withSuccessHandler(res => {
-              if(res.success) {
-                  M.toast({html: '✅ Cambio registrado en inventario', classes: 'green'});
-                  showPage('panel'); // Volver al inicio
-                  cargarDataMaestra(); // Refrescar el buscador para que vea los cambios
-              } else {
-                  M.toast({html: '❌ Error: ' + res.message, classes: 'red'});
-              }
+            if (res.success) {
+              M.toast({ html: '✅ Cambio registrado en inventario', classes: 'green' });
+              showPage('panel'); // Volver al inicio
+              cargarDataMaestra(); // Refrescar el buscador para que vea los cambios
+            } else {
+              M.toast({ html: '❌ Error: ' + res.message, classes: 'red' });
+            }
           })
           .ejecutarReemplazoFisico(data);
-  }
-}
+      }
+    }
 
-// Escuchar el envío del formulario
-document.getElementById('form-mantenimiento').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const id = document.getElementById('maint-id').value;
-    const cable = document.getElementById('maint-cable').value || 0;
-    
-    // Construir lista de tareas realizadas según los checks
-    let tareas = [];
-    if(document.getElementById('maint-switch').checked) tareas.push("Switch OK");
-    if(document.getElementById('maint-bocas').checked) tareas.push("Bocas OK");
-    if(document.getElementById('maint-fichas').checked) tareas.push("Fichas RJ45");
-    if(document.getElementById('maint-limpieza').checked) tareas.push("Limpieza Óptica");
-    if(document.getElementById('maint-enfoque').checked) tareas.push("Re-enfocado");
+    // Escuchar el envío del formulario de mantenimiento
+    function inicializarFormularioMantenimiento() {
+      const formMant = document.getElementById('form-mantenimiento');
+      if (!formMant) return;
 
-    const data = {
-        id: id,
-        tipoAccion: 'MANTENIMIENTO_SITIO',
-        metrosCable: cable,
-        tareasRealizadas: tareas.join(", "),
-        observaciones: document.getElementById('maint-obs').value
-    };
+      formMant.addEventListener('submit', function (e) {
+        e.preventDefault();
 
-    M.toast({html: 'Guardando informe...', classes: 'blue'});
+        const id = document.getElementById('maint-id').value;
+        if (!id) {
+          M.toast({ html: '❌ No hay ID válido', classes: 'red' });
+          return;
+        }
 
-    google.script.run
-        .withSuccessHandler(res => {
-            M.toast({html: '✅ Mantenimiento registrado con éxito', classes: 'green'});
-            showPage('panel-page'); // Volver al buscador
-        })
-        .withFailureHandler(err => {
-            M.toast({html: '❌ Error al guardar', classes: 'red'});
-        })
-        .procesarSolicitudUnificada(data);
-});
+        const cable = document.getElementById('mant-cable').value || 0;
 
-function ejecutarResolucionTarea(idTarea, nuevoEstado) {
-    if (!confirm(`¿Confirmar estado ${nuevoEstado} para la tarea ${idTarea}?`)) return;
-    
-    M.toast({html: 'Procesando...', classes: 'blue'});
-    
-    google.script.run
-        .withSuccessHandler(res => {
-            if (res.success) {
-                M.toast({html: '✅ Actualizado correctamente', classes: 'green'});
-                M.Modal.getInstance(document.getElementById('modal-detalle')).close();
-                ejecutarBusquedaMaestra(); // Refrescar lista para ver los cambios
+        // Construir lista de tareas realizadas según los checks
+        let tareas = [];
+        if (document.getElementById('maint-switch').checked) tareas.push("Switch OK");
+        if (document.getElementById('maint-bocas').checked) tareas.push("Bocas OK");
+        if (document.getElementById('maint-fichas').checked) tareas.push("Fichas RJ45");
+        if (document.getElementById('maint-limpieza').checked) tareas.push("Limpieza Óptica");
+        if (document.getElementById('maint-enfoque').checked) tareas.push("Re-enfocado");
+
+        const data = {
+          id: id,
+          tipoAccion: 'MANTENIMIENTO_SITIO',
+          metrosCable: cable,
+          tareasRealizadas: tareas.join(", "),
+          observaciones: document.getElementById('maint-obs').value
+        };
+
+        M.toast({ html: 'Guardando informe...', classes: 'blue' });
+
+        google.script.run
+          .withSuccessHandler(res => {
+            if (res && res.success) {
+              M.toast({ html: '✅ Mantenimiento registrado con éxito', classes: 'green' });
+              // Volver al panel después de guardar
+              setTimeout(() => {
+                showPage('panel-page');
+                cargarDataMaestra(); // Actualizar datos
+              }, 1000);
             } else {
-                M.toast({html: '❌ Error: ' + res.message, classes: 'red'});
+              M.toast({ html: '❌ Error: ' + (res?.message || 'Desconocido'), classes: 'red' });
             }
+          })
+          .withFailureHandler(err => {
+            M.toast({ html: '❌ Error al guardar', classes: 'red' });
+          })
+          .procesarSolicitudUnificada(data);
+      });
+    }
+
+    function ejecutarResolucionTarea(idTarea, nuevoEstado) {
+      if (!confirm(`¿Confirmar estado ${nuevoEstado} para la tarea ${idTarea}?`)) return;
+
+      M.toast({ html: 'Procesando...', classes: 'blue' });
+
+      google.script.run
+        .withSuccessHandler(res => {
+          if (res.success) {
+            M.toast({ html: '✅ Actualizado correctamente', classes: 'green' });
+            M.Modal.getInstance(document.getElementById('modal-detalle')).close();
+            ejecutarBusquedaMaestra(); // Refrescar lista para ver los cambios
+          } else {
+            M.toast({ html: '❌ Error: ' + res.message, classes: 'red' });
+          }
         })
         .resolverTarea(idTarea, nuevoEstado);
-}
+    }
 
 
-// Ejemplo: cuando elige el proveedor en el select:
-function mostrarAyudaIP() {
-  const prov = document.getElementById('red-proveedor').value;
-  const ayuda = SEGMENTOS_IP[prov] || "Segmento no definido";
-  document.getElementById('ayuda-ip-texto').innerText = "Sugerencia: " + ayuda;
-}
+    // Ejemplo: cuando elige el proveedor en el select:
+    function mostrarAyudaIP() {
+      const prov = document.getElementById('red-proveedor').value;
+      const ayuda = SEGMENTOS_IP[prov] || "Segmento no definido";
+      document.getElementById('ayuda-ip-texto').innerText = "Sugerencia: " + ayuda;
+    }
 
-// --- FUNCIONES DEL COM ---
+    // --- FUNCIONES DEL COM ---
 
-function reportarFallaCOM(id, tipoReporte) {
-  const activo = DATA_MAESTRA.find(a => a.ID === id);
-  const direccion = activo ? activo.DIRECCION : "Sin dirección";
-  
-  // Personalizamos el mensaje del prompt según el tipo
-  let mensajePrompt = `Ingrese observaciones para el reporte de ${tipoReporte}:`;
-  if(tipoReporte === 'PODA') mensajePrompt = "Especifique qué tapa la cámara (ej: Rama lateral derecha):";
-  
-  const obs = prompt(mensajePrompt);
-  
-  if (obs !== null) { // Si no canceló el prompt
-      M.toast({html: `Enviando reporte de ${tipoReporte}...`, classes: 'blue'});
-      
-      const data = {
+    function reportarFallaCOM(id, tipoReporte) {
+      const activo = DATA_MAESTRA.find(a => a.ID === id);
+      const direccion = activo ? activo.DIRECCION : "Sin dirección";
+
+      // Personalizamos el mensaje del prompt según el tipo
+      let mensajePrompt = `Ingrese observaciones para el reporte de ${tipoReporte}:`;
+      if (tipoReporte === 'PODA') mensajePrompt = "Especifique qué tapa la cámara (ej: Rama lateral derecha):";
+
+      const obs = prompt(mensajePrompt);
+
+      if (obs !== null) { // Si no canceló el prompt
+        M.toast({ html: `Enviando reporte de ${tipoReporte}...`, classes: 'blue' });
+
+        const data = {
           id: id,
           tipoAccion: 'REPORTE_COM',
           tipoFalla: tipoReporte, // PODA, LIMPIEZA, MOVIMIENTO, DESENFOQUE
           direccion: direccion,
           observaciones: obs
-      };
+        };
 
-      google.script.run
+        google.script.run
           .withSuccessHandler(res => {
-              M.toast({html: `✅ ${tipoReporte} reportado correctamente`, classes: 'green'});
+            M.toast({ html: `✅ ${tipoReporte} reportado correctamente`, classes: 'green' });
           })
           .procesarSolicitudUnificada(data);
-  }
-}
-
-function abrirFormularioFinalizar(idTarea, tipo, nombreProv, lat, lng) {
-  document.getElementById('final-idTarea').value = idTarea;
-  document.getElementById('final-tipoActivo').value = tipo;
-  document.getElementById('final-direccion').value = nombreProv;
-  document.getElementById('final-lat').value = lat;
-  document.getElementById('final-lng').value = lng;
-  document.getElementById('alertaDuplicados').innerHTML = "";
-  document.getElementById('contenedor-tareas-tecnico').style.display = 'none';
-  document.getElementById('finalizar-instalacion-page').style.display = 'block';
-
-  M.updateTextFields();
-  M.FormSelect.init(document.querySelectorAll('select'));
-}
-
-function renderizarTablaSolicitudes(solicitudes) {
-    const cuerpoTabla = document.getElementById('tabla-solicitudes-body'); // ID corregido
-    if (!cuerpoTabla) return;
-    
-    if (!solicitudes || solicitudes.length === 0) {
-        cuerpoTabla.innerHTML = "<tr><td colspan='5' class='center'>Sin solicitudes pendientes.</td></tr>";
-        return;
+      }
     }
 
-    cuerpoTabla.innerHTML = solicitudes.map(s => `
+    // función adicional para botones de Secretario / Admin
+    function reportarFallaSEC(id) {
+      const activo = DATA_MAESTRA.find(a => a.ID === id);
+      const direccion = activo ? activo.DIRECCION : "Sin dirección";
+      const obs = prompt("Ingrese comentario o instrucción interna:");
+      if (obs !== null) {
+        M.toast({ html: 'Enviando reporte interno...', classes: 'blue' });
+        const data = {
+          id: id,
+          tipoAccion: 'REPORTE_SECRETARIO',
+          direccion: direccion,
+          observaciones: obs
+        };
+        google.script.run
+          .withSuccessHandler(res => {
+            M.toast({ html: '✅ Reporte interno enviado', classes: 'green' });
+          })
+          .procesarSolicitudUnificada(data);
+      }
+    }
+
+    function abrirFormularioFinalizar(idTarea, tipo, nombreProv, lat, lng) {
+      document.getElementById('final-idTarea').value = idTarea;
+      document.getElementById('final-tipoActivo').value = tipo;
+      document.getElementById('final-direccion').value = nombreProv;
+      document.getElementById('final-lat').value = lat;
+      document.getElementById('final-lng').value = lng;
+      document.getElementById('alertaDuplicados').innerHTML = "";
+      document.getElementById('contenedor-tareas-tecnico').style.display = 'none';
+      document.getElementById('finalizar-instalacion-page').style.display = 'block';
+
+      M.updateTextFields();
+      M.FormSelect.init(document.querySelectorAll('select'));
+    }
+
+    function renderizarTablaSolicitudes(solicitudes) {
+      const cuerpoTabla = document.getElementById('tabla-solicitudes-body'); // ID corregido
+      if (!cuerpoTabla) return;
+
+      if (!solicitudes || solicitudes.length === 0) {
+        cuerpoTabla.innerHTML = "<tr><td colspan='5' class='center'>Sin solicitudes pendientes.</td></tr>";
+        return;
+      }
+
+      cuerpoTabla.innerHTML = solicitudes.map(s => `
         <tr>
             <td>${s.fecha || '-'}</td>
             <td><span class="chip">${s.tipoActivo}</span></td>
@@ -1834,200 +2002,267 @@ function renderizarTablaSolicitudes(solicitudes) {
             </td>
         </tr>
     `).join('');
-}
-let categoriaActual = 'TODO'; // Variable global de estado
-
-function ejecutarBusquedaMaestra(texto = '') {
-    const listaUI = document.getElementById('lista-resultados-maestros');
-    if (!listaUI) return;
-
-    const inputTexto = document.getElementById('input-busqueda-maestra');
-    const busquedaActual = texto || (inputTexto ? inputTexto.value : "");
-
-    // leemos los filtros seleccionados (checkboxes)
-    const checks = document.querySelectorAll('#filtrosBusqueda input[type=checkbox]:checked');
-    let tiposSeleccionados = Array.from(checks).map(cb => cb.value);
-    if (tiposSeleccionados.length === 0) tiposSeleccionados = ['TODO'];
-
-    if (typeof DATA_MAESTRA === 'undefined' || !Array.isArray(DATA_MAESTRA)) {
-        listaUI.innerHTML = '<li class="collection-item">Cargando base de datos...</li>';
-        return;
     }
+    let categoriaActual = 'TODO'; // Variable global de estado
 
-    const filtrados = DATA_MAESTRA.filter(item => {
-        const idStr = item.ID ? item.ID.toString().toUpperCase() : '';
-        const dirStr = item.DIRECCION ? item.DIRECCION.toUpperCase() : '';
+    function ejecutarBusquedaMaestra(texto = '') {
+      const listaUI = document.getElementById('lista-resultados-maestros');
+      const btnX = document.getElementById('btnLimpiarBusqueda');
+      const inputMaestro = document.getElementById('input-busqueda-maestra');
+
+      if (!listaUI) return;
+
+      // Obtener el texto de búsqueda (puede venir por parámetro o del input)
+      const busquedaActual = texto.trim() || (inputMaestro ? inputMaestro.value.trim() : "");
+
+      // Mostrar/ocultar botón limpiar
+      if (btnX) {
+        btnX.style.display = busquedaActual.length > 0 ? 'block' : 'none';
+      }
+
+      // Obtener checkboxes seleccionados
+      const checks = document.querySelectorAll('#filtrosBusqueda input[type="checkbox"]:checked');
+      let tiposSeleccionados = Array.from(checks).map(cb => cb.value.toUpperCase());
+
+      // Si no hay ninguno seleccionado, mostrar todos (sin filtrar por tipo)
+      const filtrarPorTipo = tiposSeleccionados.length > 0;
+
+      if (!DATA_MAESTRA || !Array.isArray(DATA_MAESTRA) || DATA_MAESTRA.length === 0) {
+        listaUI.innerHTML = '<li class="collection-item grey-text center" style="padding:15px;">Cargando base de datos...</li>';
+        return;
+      }
+
+      // Filtrar resultados
+      const filtrados = DATA_MAESTRA.filter(item => {
+        const idStr = (item.ID || '').toString().toUpperCase();
+        const dirStr = (item.DIRECCION || '').toUpperCase();
+        const tipoStr = (item.TIPO_HOJA || '').toUpperCase().trim();
         const query = busquedaActual.toUpperCase();
-        
-        const cumpleTipo = tiposSeleccionados.includes('TODO') || tiposSeleccionados.includes(item.TIPO_HOJA);
-        const cumpleTexto = idStr.includes(query) || dirStr.includes(query);
-        return cumpleTipo && cumpleTexto;
-    });
 
-    if (filtrados.length === 0) {
+        // Si hay búsqueda de texto, aplicar
+        let cumpleTexto = true;
+        if(busquedaActual.length === 0){
+          listaUI.innerHTML = `
+          <li class="collection-item center grey-text">
+          <i class="material-icons large">search</i>
+          <p>Escribí para buscar activos</p>
+          </li>`;
+          return;
+          }
+
+        // Si hay tipos seleccionados, validar tipo
+        let cumpleTipo = !filtrarPorTipo || tiposSeleccionados.includes(tipoStr);
+
+        return cumpleTexto && cumpleTipo;
+      });
+      cumpleTexto = item._index.includes(query);
+
+      // Limitar resultados a 15 para evitar saturación visual
+      const MAX_RESULTADOS = 15;
+      const resultadosLimitados = filtrados.slice(0, MAX_RESULTADOS);
+
+      if (resultadosLimitados.length === 0) {
         listaUI.innerHTML = '<li class="collection-item center grey-text" style="padding:20px;">' +
-            '<i class="material-icons" style="font-size:3rem; display:block;">search_off</i>' +
-            'No se encontraron resultados</li>';
+          '<i class="material-icons" style="font-size:3rem; display:block; margin-bottom:10px;">search_off</i>' +
+          '<strong>No se encontraron resultados</strong></li>';
         return;
-    }
+      }
 
-    // Mapeo de colores e iconos por tipo
-    const configVisual = {
-        'CAMARAS': { icon: 'videocam', color: 'blue' },
-        'TABLEROS': { icon: 'settings_input_component', color: 'yellow' },
-        'ALARMAS': { icon: 'notifications_active', color: 'red' },
-        'TAREAS': { icon: 'assignment', color: 'orange' },
-        'SOLICITUDES': { icon: 'email', color: 'purple' },
-        'SWITCHES': { icon: 'router', color: 'green' }
-    };
+      // Mapeo de colores e iconos por tipo
+      const configVisual = {
+        'CAMARAS': { icon: 'videocam', color: 'blue-text', badge: 'blue' },
+        'TABLEROS': { icon: 'settings_input_component', color: 'orange-text', badge: 'orange' },
+        'ALARMAS': { icon: 'notifications_active', color: 'red-text', badge: 'red' },
+        'TAREAS': { icon: 'assignment', color: 'amber-text', badge: 'amber' },
+        'SOLICITUDES': { icon: 'email', color: 'purple-text', badge: 'purple' },
+        'SWITCHES': { icon: 'router', color: 'green-text', badge: 'green' }
+      };
 
-    listaUI.innerHTML = filtrados.map(item => {
-        const estilo = configVisual[item.TIPO_HOJA] || { icon: 'devices', color: 'grey' };
-        
+      // Renderizar resultados
+      listaUI.innerHTML = resultadosLimitados.map(item => {
+        const estilo = configVisual[item.TIPO_HOJA] || { icon: 'devices', color: 'grey-text', badge: 'grey' };
+        const direccion = (item.DIRECCION || 'Sin dirección').substring(0, 60); // Limitar texto
+
         return `
           <li class="collection-item avatar waves-effect" 
-            style="cursor:pointer; width:100%"
-            onclick="abrirAccionesActivo('${item.ID}', '${item.TIPO_HOJA}')"
-            <i class="material-icons circle ${estilo.color}">${estilo.icon}</i>
+            style="cursor:pointer; padding: 10px 15px; border-bottom: 1px solid #eee;"
+            onclick="abrirAccionesActivo('${item.ID}', '${item.TIPO_HOJA}')">
+            <i class="material-icons circle ${estilo.badge}">${estilo.icon}</i>
             <span class="title"><b>${item.ID}</b></span>
-            <p class="grey-text truncate">${item.DIRECCION || 'Sin dirección registrada'}</p>
-            <span class="secondary-content"><small>${item.TIPO_HOJA}</small></span>
+            <p class="grey-text" style="margin: 5px 0; font-size: 0.9rem;">${direccion}</p>
+            <span class="secondary-content ${estilo.color}" style="font-size: 0.8rem; font-weight: bold;">${item.TIPO_HOJA}</span>
           </li>
         `;
-    }).join('');
-}
+      }).join('');
 
-function procesarRechazo(idSol) {
-    if (!confirm("¿Rechazar solicitud?")) return;
-    google.script.run.withSuccessHandler(res => {
+      // Mensaje si hay más resultados
+      if (filtrados.length > MAX_RESULTADOS) {
+        const exceso = filtrados.length - MAX_RESULTADOS;
+        listaUI.innerHTML += `<li class="collection-item center grey-text" style="padding:10px; font-size:0.85rem;">
+            <i class="material-icons tiny">info</i> + ${exceso} resultado(s) más. Refina la búsqueda...
+        </li>`;
+      }
+    }
+
+    function procesarRechazo(idSol) {
+      if (!confirm("¿Rechazar solicitud?")) return;
+      google.script.run.withSuccessHandler(res => {
         if (res.success) { M.toast({ html: 'Rechazada', classes: 'orange' }); actualizarBadgeUI(); showPage('solicitudes'); }
-    }).rechazarSolicitud(idSol);
-}
+      }).rechazarSolicitud(idSol);
+    }
 
-function procesarAutorizacion(idSol) {
-    if (!confirm("¿Autorizar instalación?")) return;
-    google.script.run.withSuccessHandler(res => {
+    function procesarAutorizacion(idSol) {
+      if (!confirm("¿Autorizar instalación?")) return;
+      google.script.run.withSuccessHandler(res => {
         if (res.success) { M.toast({ html: 'Autorizado', classes: 'green' }); actualizarBadgeUI(); showPage('panel'); }
-    }).autorizarSolicitud(idSol);
-}
+      }).autorizarSolicitud(idSol);
+    }
 
-// ==========================================
-// 6. INICIALIZACIÓN Y EVENTOS
-// ==========================================
-function inicializarSeccionEspecifica(pageId) {
-    M.FormSelect.init(document.querySelectorAll('select'));
-    M.updateTextFields();
-    if (pageId === 'dashboard-seguimiento') cargarDashboardSeguimiento();
-    if (pageId === 'tareas') {
+    // ==========================================
+    // 6. INICIALIZACIÓN Y EVENTOS
+    // ==========================================
+    function inicializarSeccionEspecifica(pageId) {
+      M.FormSelect.init(document.querySelectorAll('select'));
+      M.updateTextFields();
+      if (pageId === 'dashboard-seguimiento') cargarDashboardSeguimiento();
+      if (pageId === 'tareas') {
         document.getElementById('contenedor-tareas-tecnico').style.display = 'block';
         document.getElementById('finalizar-instalacion-page').style.display = 'none';
         cargarTareasTecnico();
-    }
-    if (pageId === 'solicitudes') {
-        google.script.run.withSuccessHandler(renderizarTablaSolicitudes).listarSolicitudesPendientes();
-    }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  M.AutoInit();
-
-  // 1. CARGA DE DATOS (Asegura que esto sea lo primero)
-  cargarDataMaestra(); 
-  cargarConfiguracionInicial();
-
-  // Listeners de Formularios (Optimizado)
-  const forms = [
-      { id: 'form-nuevo-tablero', func: enviarAltaNueva },
-      { id: 'form-finalizar-tecnico', func: enviarFinalizacionInstalacion },
-      { id: 'form-mantenimiento', func: null }, // El de mantenimiento lo manejas aparte abajo
-      { id: 'form-energia-insumos', func: () => {
-          const datos = { 
-            id: document.getElementById('energiaActivoId').value, 
-            tipoAccion: 'ACTUALIZAR_ENERGIA',
-            observaciones: document.getElementById('obsFinales').value 
-          };
-          ejecutarEnvioGenerico(datos, document.getElementById('form-energia-insumos'));
-      }}
-  ];
-
-  forms.forEach(f => {
-      const el = document.getElementById(f.id);
-      if (el && f.func) {
-        el.addEventListener('submit', (e) => { e.preventDefault(); f.func(); });
       }
-  });
+      if (pageId === 'solicitudes') {
+        google.script.run.withSuccessHandler(renderizarTablaSolicitudes).listarSolicitudesPendientes();
+      }
+    }
 
-  // 2. BUSCADOR CON TIMER (Solo una vez)
-  const inputMaestro = document.getElementById('input-busqueda-maestra');
-  let timerBusqueda;
-  if (inputMaestro) {
-      inputMaestro.addEventListener('input', (e) => {
+    document.addEventListener('DOMContentLoaded', () => {
+      M.AutoInit();
+
+      // 1. CARGA DE DATOS (Asegura que esto sea lo primero)
+      cargarDataMaestra();
+      cargarConfiguracionInicial();
+
+      // Inicializar formularios especiales
+      inicializarFormularioMantenimiento();
+
+      // Listeners de Formularios (Optimizado)
+      const forms = [
+        { id: 'form-nuevo-tablero', func: enviarAltaNueva },
+        { id: 'form-finalizar-tecnico', func: enviarFinalizacionInstalacion },
+        { id: 'form-mantenimiento', func: null }, // El de mantenimiento lo manejas aparte abajo
+        {
+          id: 'form-energia-insumos', func: () => {
+            const datos = {
+              id: document.getElementById('energiaActivoId').value,
+              tipoAccion: 'ACTUALIZAR_ENERGIA',
+              observaciones: document.getElementById('obsFinales').value
+            };
+            ejecutarEnvioGenerico(datos, document.getElementById('form-energia-insumos'));
+          }
+        }
+      ];
+
+      forms.forEach(f => {
+        const el = document.getElementById(f.id);
+        if (el && f.func) {
+          el.addEventListener('submit', (e) => { e.preventDefault(); f.func(); });
+        }
+      });
+
+      // 2. BUSCADOR CON TIMER Y CHECKBOXES
+      const inputMaestro = document.getElementById('input-busqueda-maestra');
+      let timerBusqueda;
+
+      if (inputMaestro) {
+        inputMaestro.addEventListener('input', (e) => {
           clearTimeout(timerBusqueda);
           timerBusqueda = setTimeout(() => {
-              ejecutarBusquedaMaestra('TODO', e.target.value);
+            ejecutarBusquedaMaestra();
           }, 300);
-      });
-  }
-  
-  // Filtros de categoría
-  document.querySelectorAll('#filtrosBusqueda input').forEach(cb => {
-    cb.addEventListener('change', () => ejecutarBusquedaMaestra());
-  });
+        });
 
-  // Forzar mayúsculas en IDs
-  ['idDefinitivo', 'energia-id-oculto', 'red-id-oculto'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) {
-          el.addEventListener('input', function() {
-              this.value = this.value.toUpperCase().replace(/\s/g, '');
-          });
+        // Permitir Enter para buscar instantáneamente
+        inputMaestro.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            clearTimeout(timerBusqueda);
+            ejecutarBusquedaMaestra();
+          }
+        });
       }
-  });
 
-  // Botones Volver y Tarjetas
-  document.querySelectorAll('.btn-volver').forEach(btn => {
-      btn.onclick = (e) => { 
-          e.preventDefault(); 
-          showPage('panel'); 
-      };
-  });
+      // 3. Filtros de categoría (checkboxes)
+      document.querySelectorAll('#filtrosBusqueda input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener('change', () => {
+          ejecutarBusquedaMaestra(); // Ejecutar búsqueda con filtros actualizados
+        });
+      });
 
-  document.querySelectorAll('.boton-tarjeta').forEach(boton => {
-      boton.addEventListener('click', function () {
+let timerBusqueda;
+
+document.getElementById("input-busqueda-maestra")
+  .addEventListener("input", function () {
+
+    clearTimeout(timerBusqueda);
+
+    timerBusqueda = setTimeout(() => {
+        ejecutarBusquedaMaestra(this.value);
+    }, 200);
+});
+
+      // Forzar mayúsculas en IDs
+      ['idDefinitivo', 'energia-id-oculto', 'red-id-oculto'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('input', function () {
+            this.value = this.value.toUpperCase().replace(/\s/g, '');
+          });
+        }
+      });
+
+      // Botones Volver y Tarjetas
+      document.querySelectorAll('.btn-volver').forEach(btn => {
+        btn.onclick = (e) => {
+          e.preventDefault();
+          showPage('panel-page');
+        };
+      });
+
+      document.querySelectorAll('.boton-tarjeta').forEach(boton => {
+        boton.addEventListener('click', function () {
           const pagina = this.getAttribute('data-page');
           if (pagina === 'mapa') window.open('https://maps.google.com', '_blank');
           else if (pagina) showPage(pagina);
+        });
       });
-  });
-});
+    });
 
-function dibujarFichaTecnica(id, tipo, data) {
-    const contenedor = document.getElementById('contenedor-detalle-ficha');
-    if (!contenedor) return;
+    function dibujarFichaTecnica(id, tipo, data) {
+      const contenedor = document.getElementById('contenedor-detalle-ficha');
+      if (!contenedor) return;
 
-    // 1. Construir lista de detalles
-    let htmlDetalles = '<ul class="collection with-header shadow-fuerte">';
-    htmlDetalles += `
+      // 1. Construir lista de detalles
+      let htmlDetalles = '<ul class="collection with-header shadow-fuerte">';
+      htmlDetalles += `
         <li class="collection-header blue darken-4 white-text">
             <h5 style="margin:0;">${id}</h5>
             <span style="font-size:0.9rem; opacity:0.8;">${tipo}</span>
         </li>`;
-    
-    const formatValue = (v) => (v instanceof Date) ? v.toLocaleDateString() : v;
 
-    for (const campo in data.detalles) {
+      const formatValue = (v) => (v instanceof Date) ? v.toLocaleDateString() : v;
+
+      for (const campo in data.detalles) {
         const valor = data.detalles[campo] || '-';
         htmlDetalles += `
             <li class="collection-item">
                 <span class="grey-text" style="font-size: 0.75rem; display:block; text-transform: uppercase;">${campo}</span>
                 <span style="font-weight: 500;">${formatValue(valor)}</span>
             </li>`;
-    }
-    htmlDetalles += '</ul>';
+      }
+      htmlDetalles += '</ul>';
 
-    // 2. Botón de Acción Unificado
-    // Este botón abre el modal principal de opciones (donde estará Reporte, Mantenimiento, etc.)
-    const btnAccion = `
+      // 2. Botón de Acción Unificado
+      // Este botón abre el modal principal de opciones (donde estará Reporte, Mantenimiento, etc.)
+      const btnAccion = `
         <div style="margin-top:20px;">
             <button class="btn-large blue darken-2 waves-effect waves-light w-100" 
                     onclick="abrirAccionesActivo('${id}', '${tipo}')">
@@ -2035,47 +2270,47 @@ function dibujarFichaTecnica(id, tipo, data) {
             </button>
         </div>`;
 
-    contenedor.innerHTML = htmlDetalles + btnAccion;
-}
-
-function toggleDetalleProveedor(val) {
-    const wrapper = document.getElementById('wrapper-otro-proveedor');
-    if (wrapper) wrapper.style.display = (val === 'OTRO') ? 'block' : 'none';
-}
-
-
-function actualizarContadores() {
-  if (!DATA_MAESTRA) return;
-  const conteos = {
-      'TODO': DATA_MAESTRA.length,
-      'CAMARAS': 0,
-      'TABLEROS': 0,
-      'ALARMAS': 0,
-      'TAREAS': 0,
-      'SOLICITUDES': 0,
-      'SWITCHES': 0
-  };
-  DATA_MAESTRA.forEach(item => {
-      if (conteos.hasOwnProperty(item.TIPO_HOJA)) {
-          conteos[item.TIPO_HOJA]++;
-      }
-  });
-  // Actualizar los numeritos en los botones
-  for (const key in conteos) {
-      const el = document.getElementById(`count-${key}`);
-      if (el) el.innerText = `(${conteos[key]})`;
-  }
-}
-
-// Prevenir pérdida de datos si hay campos llenos
-window.onbeforeunload = function() {
-    const inputs = document.querySelectorAll('input[type="text"], textarea');
-    for (let i = 0; i < inputs.length; i++) {
-        if (inputs[i].value.length > 5 && inputs[i].offsetParent !== null) {
-            return "¿Seguro que quieres salir? Tienes cambios sin guardar.";
-        }
+      contenedor.innerHTML = htmlDetalles + btnAccion;
     }
-};
+
+    function toggleDetalleProveedor(val) {
+      const wrapper = document.getElementById('wrapper-otro-proveedor');
+      if (wrapper) wrapper.style.display = (val === 'OTRO') ? 'block' : 'none';
+    }
+
+
+    function actualizarContadores() {
+      if (!DATA_MAESTRA) return;
+      const conteos = {
+        'TODO': DATA_MAESTRA.length,
+        'CAMARAS': 0,
+        'TABLEROS': 0,
+        'ALARMAS': 0,
+        'TAREAS': 0,
+        'SOLICITUDES': 0,
+        'SWITCHES': 0
+      };
+      DATA_MAESTRA.forEach(item => {
+        if (conteos.hasOwnProperty(item.TIPO_HOJA)) {
+          conteos[item.TIPO_HOJA]++;
+        }
+      });
+      // Actualizar los numeritos en los botones
+      for (const key in conteos) {
+        const el = document.getElementById(`count-${key}`);
+        if (el) el.innerText = `(${conteos[key]})`;
+      }
+    }
+
+    // Prevenir pérdida de datos si hay campos llenos
+    window.onbeforeunload = function () {
+      const inputs = document.querySelectorAll('input[type="text"], textarea');
+      for (let i = 0; i < inputs.length; i++) {
+        if (inputs[i].value.length > 5 && inputs[i].offsetParent !== null) {
+          return "¿Seguro que quieres salir? Tienes cambios sin guardar.";
+        }
+      }
+    };
   </script>
 </body>
 

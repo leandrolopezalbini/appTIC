@@ -866,41 +866,6 @@ function finalizarInstalacionYCrearActivo(datosFinales) {
   }
 }
 
-function cargarTareasTecnico() {
-  google.script.run
-    .withSuccessHandler(tareas => {
-      const lista = document.getElementById('lista-tareas-tecnico');
-      if (!tareas || tareas.length === 0) {
-        lista.innerHTML = "<li class='collection-item'>No tienes tareas asignadas.</li>";
-        return;
-      }
-      lista.innerHTML = tareas.map(t => `
-                <li class="collection-item">
-                    <div><b>${t.id}</b> - ${t.direccion}
-                        <a href="#!" class="secondary-content" onclick="prepararFinalizacion('${t.id}', '${t.tipo}', '${t.direccion}')">
-                            <i class="material-icons">send</i>
-                        </a>
-                    </div>
-                </li>
-            `).join('');
-    })
-    .obtenerMisTareasAsignadas();
-}
-
-function gestionarVisibilidadMenu(user) {
-  // Ocultar todo por defecto
-  const btnAlta = document.getElementById('btn-seccion-alta');
-  const btnSoli = document.getElementById('btn-ver-solicitudes');
-
-  if (user.rol === 'ADMIN' || user.rol === 'SECRETARIO') {
-    if (btnAlta) btnAlta.style.display = 'block';
-    if (btnSoli) btnSoli.style.display = 'block';
-  } else {
-    if (btnAlta) btnAlta.style.display = 'none';
-    if (btnSoli) btnSoli.style.display = 'none';
-  }
-}
-
 /** Vincula Switch y Conectividad  */
 function vincularSwitchTablero(data) {
   try {
