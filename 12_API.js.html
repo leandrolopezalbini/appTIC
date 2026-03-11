@@ -1,0 +1,44 @@
+<script>
+
+/* ==============================
+API PERMISOS
+============================== */
+
+function apiObtenerMisPermisos(callback){
+
+  google.script.run
+    .withSuccessHandler(callback)
+    .withFailureHandler(err => console.error(err))
+    .obtenerMisPermisos();
+
+}
+
+
+/* ==============================
+API BADGE SOLICITUDES
+============================== */
+
+function apiActualizarBadgeSolicitudes(callback){
+
+  google.script.run
+    .withSuccessHandler(callback)
+    .withFailureHandler(err => console.error(err))
+    .actualizarBadgeSolicitudes();
+
+}
+
+
+/* ==============================
+API BADGE TAREAS
+============================== */
+
+function apiActualizarBadgeTareas(callback){
+
+  google.script.run
+    .withSuccessHandler(callback)
+    .withFailureHandler(err => console.error(err))
+    .actualizarBadgeTareas();
+
+}
+
+</script>
